@@ -19,6 +19,9 @@
                         <x-nav-link :href="route('socios.create')" :active="request()->routeIs('socios.create')">
                             Mi solicitud de socio
                         </x-nav-link>
+                        <x-nav-link :href="route('certificados.index')" :active="request()->routeIs('certificados.*')">
+                            Mis certificados
+                        </x-nav-link>
                     @endif
 
                     @if (Auth::user()->hasRole('admin', 'presidente', 'secretario'))
@@ -28,7 +31,16 @@
                         <x-nav-link :href="route('agenda.index')" :active="request()->routeIs('agenda.*')">
                             Agenda de firmas
                         </x-nav-link>
+                        <x-nav-link :href="route('admin.certificados.index')" :active="request()->routeIs('admin.certificados.*')">
+                            Certificados
+                        </x-nav-link>
                         
+                    @endif
+
+                    @if (Auth::user()->hasRole('admin', 'presidente'))
+                        <x-nav-link :href="route('auditoria.index')" :active="request()->routeIs('auditoria.*')">
+                            Auditoría
+                        </x-nav-link>
                     @endif
 
                     @if (Auth::user()->hasRole('admin'))
@@ -96,6 +108,15 @@
                 <x-responsive-nav-link :href="route('socios.create')" :active="request()->routeIs('socios.create')">
                     Mi solicitud de socio
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('certificados.index')" :active="request()->routeIs('certificados.*')">
+                    Mis certificados
+                </x-responsive-nav-link>
+            @endif
+
+            @if (Auth::user()->hasRole('admin', 'presidente'))
+                <x-responsive-nav-link :href="route('auditoria.index')" :active="request()->routeIs('auditoria.*')">
+                    Auditoría
+                </x-responsive-nav-link>
             @endif
 
             @if (Auth::user()->hasRole('admin'))
@@ -110,6 +131,9 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('agenda.index')" :active="request()->routeIs('agenda.*')">
                     Agenda de firmas
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.certificados.index')" :active="request()->routeIs('admin.certificados.*')">
+                    Certificados
                 </x-responsive-nav-link>
             @endif
         </div>

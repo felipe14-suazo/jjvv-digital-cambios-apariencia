@@ -4,12 +4,24 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ $socio->nombre_completo }}
             </h2>
-            <a href="{{ route('socios.index') }}" class="text-sm underline text-gray-600 dark:text-gray-400">← Volver al listado</a>
+            <div class="flex items-center gap-4 text-sm">
+                <a href="{{ route('socios.editar', $socio) }}" class="underline text-indigo-600 dark:text-indigo-400">Editar datos</a>
+                @if ($socio->estado === 'activo')
+                    <a href="{{ route('admin.certificados.create', ['socio' => $socio->id]) }}" class="underline text-indigo-600 dark:text-indigo-400">Emitir certificado</a>
+                @endif
+                <a href="{{ route('socios.index') }}" class="underline text-gray-600 dark:text-gray-400">← Volver al listado</a>
+            </div>
         </div>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8 space-y-6">
+
+            @foreach (['socio-creado' => 'El socio fue registrado.', 'socio-editado' => 'Los datos del socio fueron actualizados.'] as $clave => $texto)
+                @if (session('status') === $clave)
+                    <div class="p-4 bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 rounded-lg text-sm">{{ $texto }}</div>
+                @endif
+            @endforeach
 
             @if (session('status') === 'socio-actualizado')
                 <div class="p-4 bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 rounded-lg text-sm">
@@ -45,8 +57,15 @@
             <div class="p-6 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-3">Documentos adjuntos</h3>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="{{ route('socios.documento', [$socio, 'carnet']) }}" target="_blank" class="underline text-indigo-600 dark:text-indigo-400">Ver carnet de identidad</a></li>
-                    <li><a href="{{ route('socios.documento', [$socio, 'boleta']) }}" target="_blank" class="underline text-indigo-600 dark:text-indigo-400">Ver boleta de servicio básico</a></li>
+                    @if ($socio->carnet_path)
+                        <li><a href="{{ route('socios.documento', [$socio, 'carnet']) }}" target="_blank" class="underline text-indigo-600 dark:text-indigo-400">Ver carnet de identidad</a></li>
+                    @endif
+                    @if ($socio->boleta_path)
+                        <li><a href="{{ route('socios.documento', [$socio, 'boleta']) }}" target="_blank" class="underline text-indigo-600 dark:text-indigo-400">Ver boleta de servicio básico</a></li>
+                    @endif
+                    @unless ($socio->carnet_path || $socio->boleta_path)
+                        <li class="text-gray-500 dark:text-gray-400">No hay documentos digitales adjuntos.</li>
+                    @endunless
                 </ul>
             </div>
             

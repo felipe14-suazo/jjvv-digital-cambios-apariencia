@@ -1,6 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Socios</h2>
+        <div class="flex items-center justify-between">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Socios</h2>
+            <a href="{{ route('socios.crear') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white">Registrar socio</a>
+        </div>
     </x-slot>
 
     @php
@@ -28,6 +31,15 @@
                     </a>
                 @endforeach
             </div>
+
+            <form method="GET" action="{{ route('socios.index') }}" class="px-4 sm:px-0 flex gap-2">
+                @if (request('estado'))
+                    <input type="hidden" name="estado" value="{{ request('estado') }}">
+                @endif
+                <input type="text" name="buscar" value="{{ request('buscar') }}" placeholder="Buscar por nombre o RUT"
+                       class="w-full sm:w-72 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm text-sm">
+                <x-secondary-button type="submit">Buscar</x-secondary-button>
+            </form>
 
             <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">

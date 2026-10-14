@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Socio extends Model
 {
+    use Auditable;
+
     protected $fillable = [
         'user_id', 'nombre_completo', 'rut', 'email', 'direccion', 'telefono',
         'residente_desde', 'carnet_path', 'boleta_path', 'estado',
