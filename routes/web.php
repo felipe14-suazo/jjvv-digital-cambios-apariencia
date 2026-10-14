@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SocioController;
 use App\Http\Controllers\CitaController;
+use App\Http\Controllers\UsuarioController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -45,13 +46,14 @@ Route::middleware(['auth', 'role:admin,presidente,secretario'])
         Route::patch('/{socio}', [SocioController::class, 'update'])->name('update');
         Route::get('/{socio}/documento/{tipo}', [SocioController::class, 'documento'])->name('documento');
 });
+
 Route::middleware(['auth', 'role:admin,presidente,secretario'])
     ->prefix('agenda')->name('agenda.')->group(function () {
         Route::get('/', [CitaController::class, 'agenda'])->name('index');
         Route::post('/', [CitaController::class, 'store'])->name('store');
         Route::patch('/{cita}/liberar', [CitaController::class, 'liberar'])->name('liberar');
         Route::delete('/{cita}', [CitaController::class, 'destroy'])->name('destroy');
-    });
+});
 
 Route::middleware(['auth', 'role:vecino'])->group(function () {
     Route::get('/socios/solicitud', [SocioController::class, 'create'])->name('socios.create');
@@ -61,6 +63,16 @@ Route::middleware(['auth', 'role:vecino'])->group(function () {
     Route::get('/mi-cita', [CitaController::class, 'index'])->name('citas.index');
     Route::post('/mi-cita/{cita}', [CitaController::class, 'reservar'])->name('citas.reservar');
     Route::delete('/mi-cita', [CitaController::class, 'cancelar'])->name('citas.cancelar');
+});
+
+// Administrador: gestión de usuarios y roles
+Route::middleware(['auth', 'role:admin'])
+    ->prefix('usuarios')->name('usuarios.')->group(function () {
+        Route::get('/', [UsuarioController::class, 'index'])->name('index');
+        Route::get('/crear', [UsuarioController::class, 'create'])->name('create');
+        Route::post('/', [UsuarioController::class, 'store'])->name('store');
+        Route::get('/{usuario}/editar', [UsuarioController::class, 'edit'])->name('edit');
+        Route::patch('/{usuario}', [UsuarioController::class, 'update'])->name('update');
 });
 
 require __DIR__.'/auth.php';

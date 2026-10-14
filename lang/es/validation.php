@@ -83,5 +83,6 @@ return [
         'hora_inicio' => 'hora de inicio',
         'hora_fin' => 'hora de término',
         'duracion' => 'duración',
+        'role' => 'rol',
     ],
 ];

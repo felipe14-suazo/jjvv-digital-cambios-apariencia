@@ -30,6 +30,13 @@
                         </x-nav-link>
                         
                     @endif
+
+                    @if (Auth::user()->hasRole('admin'))
+                        <x-nav-link :href="route('usuarios.index')" :active="request()->routeIs('usuarios.*')">
+                            Usuarios
+                        </x-nav-link>
+                    @endif
+
                 </div>
             </div>
 
@@ -88,6 +95,12 @@
             @if (Auth::user()->hasRole('vecino'))
                 <x-responsive-nav-link :href="route('socios.create')" :active="request()->routeIs('socios.create')">
                     Mi solicitud de socio
+                </x-responsive-nav-link>
+            @endif
+
+            @if (Auth::user()->hasRole('admin'))
+                <x-responsive-nav-link :href="route('usuarios.index')" :active="request()->routeIs('usuarios.*')">
+                    Usuarios
                 </x-responsive-nav-link>
             @endif
 

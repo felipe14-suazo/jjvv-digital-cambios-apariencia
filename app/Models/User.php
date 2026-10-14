@@ -34,6 +34,18 @@ class User extends Authenticatable
     {
         return in_array($this->role, $roles, true);
     }
+    public const ROLES = [
+        'admin' => 'Administrador',
+        'presidente' => 'Presidente',
+        'secretario' => 'Secretario',
+        'tesorero' => 'Tesorero',
+        'vecino' => 'Vecino',
+    ];
+    public function nombreRol(): string
+    {
+        return self::ROLES[$this->role] ?? $this->role;
+    }
+
     public function socio(): HasOne
     {
         return $this->hasOne(Socio::class);
