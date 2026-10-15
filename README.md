@@ -10,33 +10,6 @@ El proyecto busca centralizar la información de los socios, facilitar la gesti�
 
 La plataforma pretende reducir la dependencia de documentos físicos, planillas de Excel, archivos Word y canales informales de comunicación, manteniendo los procedimientos presenciales que sean necesarios para cumplir con los requisitos legales y organizacionales.
 
-## Requisitos
-
-### Funcionales de usuario (RFU)
-
-- RFU-01: El vecino debe poder iniciar una solicitud de inscripción como socio desde el sitio público.
-- RFU-02: El vecino debe poder solicitar certificados de residencia o de socio desde el sitio público.
-- RFU-03: El vecino debe poder consultar noticias e información institucional sin crear una cuenta.
-- RFU-04: El vecino debe poder contactar a la directiva mediante un formulario.
-- RFU-05: El dirigente debe poder autenticarse en el panel de administración mediante credenciales.
-- RFU-06: El dirigente debe poder registrar y actualizar la base de datos de socios.
-- RFU-07: El dirigente debe poder registrar movimientos financieros de ingresos y egresos.
-- RFU-08: El dirigente debe poder registrar actas de asamblea en una bitácora digital, con fecha y acuerdos.
-- RFU-09: El dirigente debe poder registrar agrupaciones asociadas y proyectos postulados o adjudicados.
-- RFU-10: El dirigente debe poder revisar y validar manualmente una solicitud de certificado antes de entregarlo.
-
-### Funcionales del sistema (RFS)
-
-- RFS-01: El sistema debe generar un PDF estandarizado a partir de los datos del solicitante para revisión por parte de un dirigente y, cuando corresponda, para la emisión final.
-- RFS-02: La información de socios, finanzas, actas, agrupaciones y proyectos debe almacenarse en una base de datos relacional centralizada.
-- RFS-03: El panel administrativo debe restringirse a usuarios autenticados y autorizados según sus roles.
-- RFS-04: El sistema debe registrar la fecha, el autor y los cambios relevantes en los datos de socios y finanzas. La trazabilidad debe extenderse de forma coherente a otros datos sensibles cuando corresponda.
-
-### Requisitos organizacionales
-
--RO-01: La inscripción definitiva del socio se completa presencialmente mediante la firma del libro físico.
-- RO-02: Para emitir un certificado de residencia, la directiva debe revisar presencialmente la cédula de identidad y la boleta de luz o agua exigida por la organización.
-- RO-03: Las actas de asamblea deben seguir asentándose en el libro físico; el módulo web no sustituye ese registro.
 
 ## Objetivos
 
@@ -123,43 +96,6 @@ jjvv-digital/
 
 Esta estructura resume los directorios principales de Laravel; el contenido concreto de cada carpeta puede evolucionar durante el desarrollo.
 
-## Plan de desarrollo
-
-### Sprint 1: MUST HAVE
-
-**Objetivo:** construir la base indispensable del sistema.
-
-Entregables planificados:
-
-- Configuración del entorno web.
-- Base de datos central.
-- Gestión de usuarios.
-- Autenticación.
-- Roles y restricciones de acceso.
-- Funcionalidades iniciales de socios y certificados.
-
-### Sprint 2: SHOULD HAVE
-
-**Objetivo:** incorporar funcionalidades de alto valor para la gestión cotidiana.
-
-Entregables planificados:
-
-- Módulo de ingresos y egresos.
-- Validador de certificados en línea.
-- Calendario digital de reservas de la sede.
-
-### Sprint 3: COULD HAVE
-
-**Objetivo:** incorporar herramientas complementarias de gestión y generación de información.
-
-Entregables planificados:
-
-- Bitácora de actas digitales.
-- Módulo de proyectos.
-- Mantenedor de inventario.
-- Exportación de reportes en PDF y Excel.
-
-La planificación representa el alcance previsto y no significa que todas estas funcionalidades estén actualmente implementadas.
 
 ## Consideraciones organizacionales
 
