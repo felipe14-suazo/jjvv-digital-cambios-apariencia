@@ -14,7 +14,7 @@
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
     <div>
         <x-input-label for="rut" value="RUT" />
-        <input id="rut" name="rut" type="text" class="{{ $cls }}" placeholder="12345678-9" required
+        <input id="rut" name="rut" type="text" class="{{ $cls }}" placeholder="12345678-5" required
                value="{{ old('rut', $socio?->rut) }}">
         <x-input-error class="mt-2" :messages="$errors->get('rut')" />
     </div>

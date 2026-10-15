@@ -60,7 +60,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
                             <x-input-label for="rut_solicitante" value="RUT" />
-                            <input id="rut_solicitante" name="rut_solicitante" type="text" x-model="rut" placeholder="12345678-9" class="{{ $cls }}" required>
+                            <input id="rut_solicitante" name="rut_solicitante" type="text" x-model="rut" placeholder="12345678-5" class="{{ $cls }}" required>
                             <x-input-error class="mt-2" :messages="$errors->get('rut_solicitante')" />
                         </div>
                         <div>

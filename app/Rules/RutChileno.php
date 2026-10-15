@@ -7,7 +7,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class RutChileno implements ValidationRule
 {
-    /** Deja el RUT como "12345678-9": sin puntos ni espacios y con K en mayúscula. */
+    /** Deja el RUT como "12345678-5": sin puntos ni espacios y con K en mayúscula. */
     public static function normalizar(?string $rut): string
     {
         return strtoupper(str_replace(['.', ' '], '', (string) $rut));
@@ -38,7 +38,7 @@ class RutChileno implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (! self::esValido((string) $value)) {
-            $fail('El RUT ingresado no es válido (formato 12345678-9).');
+            $fail('El RUT ingresado no es válido (formato 12345678-5).');
         }
     }
 }

@@ -66,7 +66,7 @@
                         <div>
                             <x-input-label for="rut" value="RUT" />
                             <x-text-input id="rut" name="rut" type="text" class="mt-1 block w-full"
-                                :value="old('rut')" placeholder="12345678-9" required />
+                                :value="old('rut')" placeholder="12345678-5" required />
                             <x-input-error class="mt-2" :messages="$errors->get('rut')" />
                         </div>
 
