@@ -10,7 +10,33 @@ El proyecto busca centralizar la información de los socios, facilitar la gesti�
 
 La plataforma pretende reducir la dependencia de documentos físicos, planillas de Excel, archivos Word y canales informales de comunicación, manteniendo los procedimientos presenciales que sean necesarios para cumplir con los requisitos legales y organizacionales.
 
-**Repositorio:** https://github.com/junta-vecinal-digital/jjvv-digital
+## Requisitos
+
+### Funcionales de usuario (RFU)
+
+- RFU-01: El vecino debe poder iniciar una solicitud de inscripción como socio desde el sitio público.
+- RFU-02: El vecino debe poder solicitar certificados de residencia o de socio desde el sitio público.
+- RFU-03: El vecino debe poder consultar noticias e información institucional sin crear una cuenta.
+- RFU-04: El vecino debe poder contactar a la directiva mediante un formulario.
+- RFU-05: El dirigente debe poder autenticarse en el panel de administración mediante credenciales.
+- RFU-06: El dirigente debe poder registrar y actualizar la base de datos de socios.
+- RFU-07: El dirigente debe poder registrar movimientos financieros de ingresos y egresos.
+- RFU-08: El dirigente debe poder registrar actas de asamblea en una bitácora digital, con fecha y acuerdos.
+- RFU-09: El dirigente debe poder registrar agrupaciones asociadas y proyectos postulados o adjudicados.
+- RFU-10: El dirigente debe poder revisar y validar manualmente una solicitud de certificado antes de entregarlo.
+
+### Funcionales del sistema (RFS)
+
+- RFS-01: El sistema debe generar un PDF estandarizado a partir de los datos del solicitante para revisión por parte de un dirigente y, cuando corresponda, para la emisión final.
+- RFS-02: La información de socios, finanzas, actas, agrupaciones y proyectos debe almacenarse en una base de datos relacional centralizada.
+- RFS-03: El panel administrativo debe restringirse a usuarios autenticados y autorizados según sus roles.
+- RFS-04: El sistema debe registrar la fecha, el autor y los cambios relevantes en los datos de socios y finanzas. La trazabilidad debe extenderse de forma coherente a otros datos sensibles cuando corresponda.
+
+### Requisitos organizacionales
+
+-RO-01: La inscripción definitiva del socio se completa presencialmente mediante la firma del libro físico.
+- RO-02: Para emitir un certificado de residencia, la directiva debe revisar presencialmente la cédula de identidad y la boleta de luz o agua exigida por la organización.
+- RO-03: Las actas de asamblea deben seguir asentándose en el libro físico; el módulo web no sustituye ese registro.
 
 ## Objetivos
 
@@ -59,215 +85,6 @@ El proyecto utiliza la arquitectura MVC (Modelo-Vista-Controlador) proporcionada
 - **Rutas:** definen los puntos de acceso a la aplicación y sus restricciones.
 - **Migraciones:** permiten crear y actualizar las tablas de la base de datos.
 
-## Funcionalidades implementadas
-
-El estado que se describe en esta sección corresponde a la estructura y al código revisados del repositorio. La existencia de una ruta o un controlador no implica, por sí sola, que todas las funcionalidades estén terminadas o probadas.
-
-### 1. Autenticación y usuarios
-
-- Autenticación mediante credenciales.
-- Rutas protegidas para usuarios autenticados.
-- Administración de usuarios desde el panel correspondiente.
-- Creación y actualización de usuarios.
-- Asignación de roles.
-- Validación de datos y contraseñas.
-
-Los roles contemplados en las rutas incluyen:
-
-- Administrador.
-- Presidente.
-- Secretario.
-- Tesorero.
-- Vecino.
-
-El acceso a determinadas secciones está restringido según el rol asignado.
-
-### 2. Solicitudes de inscripción de socios
-
-El sistema contempla un flujo para solicitar la inscripción como socio de la Junta de Vecinos.
-
-Entre las funcionalidades presentes en el código se encuentran:
-
-- Registro de datos personales y de contacto.
-- Registro del RUT y la dirección.
-- Validación de una residencia mínima de seis meses.
-- Carga de una copia del documento de identidad.
-- Carga de un comprobante de domicilio.
-- Registro de la solicitud asociada al usuario autenticado.
-- Consulta y revisión de solicitudes por parte de dirigentes autorizados.
-- Actualización del estado de la solicitud.
-- Registro del usuario que revisa la solicitud.
-- Registro de la fecha de ingreso cuando se activa al socio.
-
-Los estados contemplados para la solicitud son:
-
-- `por_firmar`
-- `activo`
-- `rechazado`
-
-La aceptación definitiva debe respetar el procedimiento presencial de firma del libro de registro de socios.
-
-### 3. Reserva de horas para atención presencial
-
-El sistema incluye funcionalidades para organizar las horas de atención relacionadas con la inscripción de socios.
-
-Se contempla:
-
-- Visualización de horas disponibles.
-- Reserva de una hora por parte del vecino.
-- Cancelación de una reserva futura.
-- Creación de horarios por parte de dirigentes autorizados.
-- Definición de fecha, hora de inicio, hora de término y duración.
-- Visualización de la agenda de atención.
-- Liberación de horas reservadas.
-- Eliminación de horarios que no estén reservados.
-
-Las reservas están orientadas a facilitar la coordinación de la atención presencial necesaria para completar la inscripción.
-
-### 4. Módulo financiero
-
-Las rutas contemplan un acceso inicial al módulo financiero para usuarios autenticados con determinados roles.
-
-La gestión efectiva de ingresos y egresos permanece pendiente de desarrollo y verificación.
-
-### 5. Otras funcionalidades proyectadas
-
-Los siguientes módulos forman parte del alcance general del proyecto, pero no deben considerarse terminados hasta que se implementen y verifiquen:
-
-- Emisión y validación de certificados.
-- Gestión de ingresos y egresos.
-- Calendario general de uso y arriendo de la sede.
-- Registro digital de actas de asamblea y directiva.
-- Gestión de agrupaciones asociadas.
-- Seguimiento de proyectos postulados y adjudicados.
-- Inventario de activos e insumos.
-- Registro de préstamos de materiales.
-- Generación y exportación de reportes PDF y Excel.
-- Canal público de noticias e información institucional.
-- Formulario de contacto con la directiva.
-
-## Requisitos del sistema
-
-Para ejecutar el proyecto localmente se necesita:
-
-- PHP 8.3 o compatible con las restricciones de Composer.
-- Composer.
-- Node.js y npm.
-- SQLite.
-- Un navegador web moderno.
-
-También es necesario disponer de las extensiones de PHP requeridas por Laravel y sus dependencias.
-
-## Instalación y configuración
-
-### 1. Clonar el repositorio
-
-```bash
-git clone https://github.com/junta-vecinal-digital/jjvv-digital.git
-cd jjvv-digital
-```
-
-### 2. Instalar las dependencias
-
-Instalar las dependencias de PHP:
-
-```bash
-composer install
-```
-
-Instalar las dependencias frontend:
-
-```bash
-npm install
-```
-
-### 3. Configurar el entorno
-
-Crear el archivo `.env` a partir de la configuración de ejemplo:
-
-```bash
-cp .env.example .env
-```
-
-Generar la clave de la aplicación:
-
-```bash
-php artisan key:generate
-```
-
-Revisar la configuración de la aplicación en el archivo `.env`.
-
-Por defecto, el proyecto está configurado para utilizar SQLite.
-
-### 4. Configurar la base de datos
-
-Verificar que exista el archivo de base de datos:
-
-```text
-database/database.sqlite
-```
-
-Si no existe, crearlo antes de ejecutar las migraciones:
-
-```bash
-touch database/database.sqlite
-```
-
-En Windows, el archivo puede crearse desde el explorador de archivos o mediante PowerShell:
-
-```powershell
-New-Item database/database.sqlite -ItemType File
-```
-
-Ejecutar las migraciones:
-
-```bash
-php artisan migrate
-```
-
-Este comando crea las tablas definidas en las migraciones del proyecto.
-
-### 5. Compilar los recursos frontend
-
-Para generar los archivos frontend de producción:
-
-```bash
-npm run build
-```
-
-Durante el desarrollo, se puede utilizar Vite en modo observación:
-
-```bash
-npm run dev
-```
-
-### 6. Ejecutar la aplicación
-
-Iniciar el servidor de desarrollo de Laravel:
-
-```bash
-php artisan serve
-```
-
-Abrir la dirección indicada por Laravel, normalmente:
-
-http://127.0.0.1:8000
-
-Para trabajar con actualizaciones automáticas del frontend, mantener `npm run dev` ejecutándose en otra terminal.
-
-## Comandos útiles
-
-| Comando | Descripción |
-|---|---|
-| `composer install` | Instala las dependencias de PHP. |
-| `npm install` | Instala las dependencias frontend. |
-| `php artisan migrate` | Ejecuta las migraciones de la base de datos. |
-| `php artisan migrate:status` | Consulta el estado de las migraciones. |
-| `php artisan serve` | Inicia el servidor de desarrollo. |
-| `npm run dev` | Inicia Vite en modo desarrollo. |
-| `npm run build` | Compila los recursos frontend. |
-| `php artisan test` | Ejecuta las pruebas configuradas en el proyecto. |
-
 ## Organización del repositorio
 
 La estructura principal del proyecto incluye:
@@ -308,8 +125,6 @@ Esta estructura resume los directorios principales de Laravel; el contenido conc
 
 ## Plan de desarrollo
 
-El desarrollo se organiza en tres sprints, según la prioridad de las funcionalidades.
-
 ### Sprint 1: MUST HAVE
 
 **Objetivo:** construir la base indispensable del sistema.
@@ -348,25 +163,9 @@ La planificación representa el alcance previsto y no significa que todas estas 
 
 ## Consideraciones organizacionales
 
-El sistema debe respetar los procedimientos internos de la Junta de Vecinos.
-
 - La inscripción definitiva de un socio requiere la firma presencial del libro de registro.
-- Para emitir un certificado de residencia, se deben revisar presencialmente los documentos exigidos por la organización.
-- Las actas de asamblea deben mantenerse en el libro físico correspondiente. El registro digital funciona como respaldo y mecanismo de transparencia.
 - Las actas de directiva deben contar con acceso restringido a los miembros autorizados.
 - Los datos personales y documentos de los vecinos deben estar protegidos mediante controles de acceso adecuados.
-
-## Alcance y limitaciones
-
-El proyecto busca centralizar procesos administrativos, mejorar la transparencia y facilitar la comunicación entre la directiva y los vecinos.
-
-No contempla, dentro del alcance definido:
-
-- Desarrollo de una aplicación móvil nativa.
-- Implementación de un sistema de pagos en línea.
-- Sistema de votación electrónica.
-
-La aplicación web no reemplaza los procedimientos físicos que sean obligatorios para la organización.
 
 ## Estado del proyecto
 
@@ -376,6 +175,3 @@ La base tecnológica está configurada sobre Laravel, con autenticación, admini
 
 Los módulos adicionales deben incorporarse progresivamente de acuerdo con la planificación de los sprints y verificarse antes de considerarlos terminados.
 
-## Licencia
-
-La licencia del proyecto debe definirse de acuerdo con las decisiones de sus responsables. No se establece aquí una licencia específica para JJVV Digital.
