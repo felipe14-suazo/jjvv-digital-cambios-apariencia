@@ -39,6 +39,18 @@
                         </x-nav-link>
                     @endif
 
+                    @if (Auth::user()->hasRole('presidente', 'secretario'))
+                        <x-nav-link :href="route('parametros.index')" :active="request()->routeIs('parametros.*')">
+                            Parámetros
+                        </x-nav-link>
+                    @endif
+
+                    @if (Auth::user()->hasRole('presidente', 'tesorero'))
+                        <x-nav-link :href="route('ingresos.index')" :active="request()->routeIs('ingresos.*')">
+                            Ingresos
+                        </x-nav-link>
+                    @endif
+
                     @if (Auth::user()->hasRole('presidente'))
                         <x-nav-link :href="route('auditoria.index')" :active="request()->routeIs('auditoria.*')">
                             Auditoría
@@ -114,6 +126,18 @@
             @if (Auth::user()->esSocioActivo())
                 <x-responsive-nav-link :href="route('certificados.index')" :active="request()->routeIs('certificados.*')">
                     Mis certificados
+                </x-responsive-nav-link>
+            @endif
+
+            @if (Auth::user()->hasRole('presidente', 'secretario'))
+                <x-responsive-nav-link :href="route('parametros.index')" :active="request()->routeIs('parametros.*')">
+                    Parámetros
+                </x-responsive-nav-link>
+            @endif
+
+            @if (Auth::user()->hasRole('presidente', 'tesorero'))
+                <x-responsive-nav-link :href="route('ingresos.index')" :active="request()->routeIs('ingresos.*')">
+                    Ingresos
                 </x-responsive-nav-link>
             @endif
 

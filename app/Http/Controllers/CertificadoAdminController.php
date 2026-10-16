@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Certificado;
 use App\Models\Socio;
 use App\Rules\RutChileno;
+use App\Models\Parametro;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -35,7 +36,7 @@ class CertificadoAdminController extends Controller
         return view('certificados.admin.create', [
             'sociosActivos' => Socio::where('estado', 'activo')->orderBy('nombre_completo')->get(),
             'socioSel' => $request->socio ? Socio::where('estado', 'activo')->find($request->socio) : null,
-            'aporteSugerido' => config('jjvv.aporte_residencia'),
+            'aporteSugerido' => Parametro::entero('certificado_residencia_valor'),
         ]);
     }
 
@@ -74,7 +75,7 @@ class CertificadoAdminController extends Controller
 
         return view('certificados.admin.show', [
             'certificado' => $certificado,
-            'aporteSugerido' => config('jjvv.aporte_residencia'),
+            'aporteSugerido' => Parametro::entero('certificado_residencia_valor'),
         ]);
     }
 

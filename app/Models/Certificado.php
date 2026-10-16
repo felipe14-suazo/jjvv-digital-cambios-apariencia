@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\Auditable;
+use App\Models\Parametro;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -127,7 +128,7 @@ class Certificado extends Model
                         'correlativo' => $correlativo,
                         'folio' => sprintf('%d-%04d', $anio, $correlativo),
                         'fecha_emision' => now()->toDateString(),
-                        'fecha_vencimiento' => now()->addDays(config('jjvv.certificado_vigencia_dias'))->toDateString(),
+                        'fecha_vencimiento' => now()->addDays(Parametro::entero('certificado_vigencia_dias'))->toDateString(),
                         'otorgado_por' => $por->id,
                     ])->save();
                 });

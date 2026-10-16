@@ -9,6 +9,8 @@ use App\Http\Controllers\SocioController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\VerificacionController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ParametroController;
+use App\Http\Controllers\IngresoController;
 
 // ---------- Público ----------
 Route::get('/', function () {
@@ -57,11 +59,15 @@ Route::middleware(['auth', 'role:vecino'])->group(function () {
         ->whereNumber('certificado')->name('certificados.descargar');
     });
 
-// ---------- Finanzas (módulo pendiente: Sprint 2) ----------
+// ---------- Finanzas: presidente y tesorero ----------
 Route::middleware(['auth', 'role:presidente,tesorero'])->group(function () {
     Route::get('/finanzas', function () {
-        return 'Acceso permitido: módulo financiero (solo Admin, Presidente o Tesorero)';
+        return 'Acceso permitido: módulo financiero (Presidente o Tesorero)';
     })->name('finanzas.index');
+
+    Route::get('/ingresos', [IngresoController::class, 'index'])->name('ingresos.index');
+    Route::get('/ingresos/crear', [IngresoController::class, 'create'])->name('ingresos.create');
+    Route::post('/ingresos', [IngresoController::class, 'store'])->name('ingresos.store');
 });
 
 // ---------- Presidente y secretario ----------
@@ -98,6 +104,10 @@ Route::middleware(['auth', 'role:presidente,secretario'])->group(function () {
         Route::post('/{certificado}/anular', [CertificadoAdminController::class, 'anular'])->whereNumber('certificado')->name('anular');
         Route::get('/{certificado}/pdf', [CertificadoAdminController::class, 'pdf'])->whereNumber('certificado')->name('pdf');
     });
+
+    // Parámetros del sistema
+    Route::get('/parametros', [ParametroController::class, 'index'])->name('parametros.index');
+    Route::put('/parametros', [ParametroController::class, 'update'])->name('parametros.update');
 });
 
 // ---------- Auditoría: solo presidente ----------

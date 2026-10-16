@@ -21,7 +21,7 @@
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Solicitar un certificado</h3>
                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
                     Para el certificado de residencia debes presentar en la sede tu carnet de identidad y una boleta de luz o agua.
-                    El aporte voluntario es de ${{ number_format(config('jjvv.aporte_residencia'), 0, ',', '.') }}.
+                    El aporte voluntario es de ${{ number_format(\App\Models\Parametro::entero('certificado_residencia_valor'), 0, ',', '.') }}.
                 </p>
 
                 <form method="POST" action="{{ route('certificados.store') }}" class="mt-6 space-y-6"
