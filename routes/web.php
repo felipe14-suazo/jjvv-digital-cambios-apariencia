@@ -40,28 +40,32 @@ Route::middleware(['auth', 'role:vecino'])->group(function () {
     // Solicitud de inscripción como socio
     Route::get('/socios/solicitud', [SocioController::class, 'create'])->name('socios.create');
     Route::post('/socios/solicitud', [SocioController::class, 'store'])->name('socios.store');
+    Route::put('/socios/solicitud', [SocioController::class, 'reenviar'])->name('socios.reenviar');
 
     // Reserva de hora para firmar el libro
     Route::get('/mi-cita', [CitaController::class, 'index'])->name('citas.index');
     Route::post('/mi-cita/{cita}', [CitaController::class, 'reservar'])->name('citas.reservar');
     Route::delete('/mi-cita', [CitaController::class, 'cancelar'])->name('citas.cancelar');
 
-    // Certificados
+});
+
+// ---------- Socio activo (según la ficha, no según el rol) ----------
+    Route::middleware(['auth', 'socio.activo'])->group(function () {
     Route::get('/certificados', [CertificadoController::class, 'index'])->name('certificados.index');
     Route::post('/certificados', [CertificadoController::class, 'store'])->name('certificados.store');
     Route::get('/certificados/{certificado}/pdf', [CertificadoController::class, 'descargar'])
         ->whereNumber('certificado')->name('certificados.descargar');
-});
+    });
 
 // ---------- Finanzas (módulo pendiente: Sprint 2) ----------
-Route::middleware(['auth', 'role:admin,presidente,tesorero'])->group(function () {
+Route::middleware(['auth', 'role:presidente,tesorero'])->group(function () {
     Route::get('/finanzas', function () {
         return 'Acceso permitido: módulo financiero (solo Admin, Presidente o Tesorero)';
     })->name('finanzas.index');
 });
 
-// ---------- Dirigentes: admin, presidente y secretario ----------
-Route::middleware(['auth', 'role:admin,presidente,secretario'])->group(function () {
+// ---------- Presidente y secretario ----------
+Route::middleware(['auth', 'role:presidente,secretario'])->group(function () {
 
     // Socios
     Route::prefix('socios')->name('socios.')->group(function () {
@@ -96,8 +100,8 @@ Route::middleware(['auth', 'role:admin,presidente,secretario'])->group(function 
     });
 });
 
-// ---------- Auditoría: admin y presidente ----------
-Route::middleware(['auth', 'role:admin,presidente'])->get('/auditoria', [AuditoriaController::class, 'index'])->name('auditoria.index');
+// ---------- Auditoría: solo presidente ----------
+Route::middleware(['auth', 'role:presidente'])->get('/auditoria', [AuditoriaController::class, 'index'])->name('auditoria.index');
 
 // ---------- Administrador: usuarios y roles ----------
 Route::middleware(['auth', 'role:admin'])

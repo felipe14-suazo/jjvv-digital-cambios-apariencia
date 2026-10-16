@@ -47,6 +47,18 @@ class User extends Authenticatable
         return self::ROLES[$this->role] ?? $this->role;
     }
 
+        /** Dirigente: presidente, secretario o tesorero. El administrador no lo es. */
+    public function esDirigente(): bool
+    {
+        return $this->hasRole('presidente', 'secretario', 'tesorero');
+    }
+
+    /** Socio: se deduce de la ficha en estado activo, no del rol. */
+    public function esSocioActivo(): bool
+    {
+        return $this->socio?->estado === 'activo';
+    }
+
     public function socio(): HasOne
     {
         return $this->hasOne(Socio::class);

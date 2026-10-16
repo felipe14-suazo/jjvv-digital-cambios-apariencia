@@ -15,16 +15,19 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    @if (Auth::user()->hasRole('vecino'))
+                                        @if (Auth::user()->hasRole('vecino'))
                         <x-nav-link :href="route('socios.create')" :active="request()->routeIs('socios.create')">
                             Mi solicitud de socio
                         </x-nav-link>
+                    @endif
+
+                    @if (Auth::user()->esSocioActivo())
                         <x-nav-link :href="route('certificados.index')" :active="request()->routeIs('certificados.*')">
                             Mis certificados
                         </x-nav-link>
                     @endif
 
-                    @if (Auth::user()->hasRole('admin', 'presidente', 'secretario'))
+                    @if (Auth::user()->hasRole('presidente', 'secretario'))
                         <x-nav-link :href="route('socios.index')" :active="request()->routeIs('socios.*')">
                             Socios
                         </x-nav-link>
@@ -34,10 +37,9 @@
                         <x-nav-link :href="route('admin.certificados.index')" :active="request()->routeIs('admin.certificados.*')">
                             Certificados
                         </x-nav-link>
-                        
                     @endif
 
-                    @if (Auth::user()->hasRole('admin', 'presidente'))
+                    @if (Auth::user()->hasRole('presidente'))
                         <x-nav-link :href="route('auditoria.index')" :active="request()->routeIs('auditoria.*')">
                             Auditoría
                         </x-nav-link>
@@ -48,7 +50,6 @@
                             Usuarios
                         </x-nav-link>
                     @endif
-
                 </div>
             </div>
 
@@ -108,24 +109,15 @@
                 <x-responsive-nav-link :href="route('socios.create')" :active="request()->routeIs('socios.create')">
                     Mi solicitud de socio
                 </x-responsive-nav-link>
+            @endif
+
+            @if (Auth::user()->esSocioActivo())
                 <x-responsive-nav-link :href="route('certificados.index')" :active="request()->routeIs('certificados.*')">
                     Mis certificados
                 </x-responsive-nav-link>
             @endif
 
-            @if (Auth::user()->hasRole('admin', 'presidente'))
-                <x-responsive-nav-link :href="route('auditoria.index')" :active="request()->routeIs('auditoria.*')">
-                    Auditoría
-                </x-responsive-nav-link>
-            @endif
-
-            @if (Auth::user()->hasRole('admin'))
-                <x-responsive-nav-link :href="route('usuarios.index')" :active="request()->routeIs('usuarios.*')">
-                    Usuarios
-                </x-responsive-nav-link>
-            @endif
-
-            @if (Auth::user()->hasRole('admin', 'presidente', 'secretario'))
+            @if (Auth::user()->hasRole('presidente', 'secretario'))
                 <x-responsive-nav-link :href="route('socios.index')" :active="request()->routeIs('socios.*')">
                     Socios
                 </x-responsive-nav-link>
@@ -134,6 +126,18 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.certificados.index')" :active="request()->routeIs('admin.certificados.*')">
                     Certificados
+                </x-responsive-nav-link>
+            @endif
+
+            @if (Auth::user()->hasRole('presidente'))
+                <x-responsive-nav-link :href="route('auditoria.index')" :active="request()->routeIs('auditoria.*')">
+                    Auditoría
+                </x-responsive-nav-link>
+            @endif
+
+            @if (Auth::user()->hasRole('admin'))
+                <x-responsive-nav-link :href="route('usuarios.index')" :active="request()->routeIs('usuarios.*')">
+                    Usuarios
                 </x-responsive-nav-link>
             @endif
         </div>

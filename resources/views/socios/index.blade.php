@@ -13,6 +13,7 @@
             'por_firmar' => 'Pendientes de firma',
             'activo'     => 'Activos',
             'rechazado'  => 'Rechazadas',
+            'inactivo'   => 'Inactivos',
         ];
         $actual = request('estado', '');
     @endphp

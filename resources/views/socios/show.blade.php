@@ -17,16 +17,24 @@
     <div class="py-12">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-            @foreach (['socio-creado' => 'El socio fue registrado.', 'socio-editado' => 'Los datos del socio fueron actualizados.'] as $clave => $texto)
-                @if (session('status') === $clave)
-                    <div class="p-4 bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 rounded-lg text-sm">{{ $texto }}</div>
-                @endif
-            @endforeach
+            @php
+                $mensajes = [
+                    'socio-creado' => 'El socio fue registrado.',
+                    'socio-editado' => 'Los datos del socio fueron actualizados.',
+                    'socio-por_firmar' => 'Documentos aprobados. La persona ya puede reservar su hora para firmar el libro.',
+                    'socio-rechazado' => 'La solicitud fue rechazada.',
+                    'socio-activo' => 'El socio quedó activo.',
+                    'socio-pendiente' => 'La solicitud fue reabierta. La persona puede corregir sus datos y reenviarla.',
+                    'socio-inactivo' => 'El socio fue dado de baja.',
+                ];
+            @endphp
 
-            @if (session('status') === 'socio-actualizado')
-                <div class="p-4 bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 rounded-lg text-sm">
-                    La solicitud fue actualizada.
-                </div>
+            @if (isset($mensajes[session('status')]))
+                <div class="p-4 bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 rounded-lg text-sm">{{ $mensajes[session('status')] }}</div>
+            @endif
+
+            @if ($errors->has('estado'))
+                <div class="p-4 bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 rounded-lg text-sm">{{ $errors->first('estado') }}</div>
             @endif
 
             <div class="p-6 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
@@ -50,6 +58,10 @@
                     @endif
                     @if ($socio->observaciones)
                         <div class="sm:col-span-2"><dt class="text-gray-500 dark:text-gray-400">Observaciones</dt><dd class="text-gray-900 dark:text-gray-100">{{ $socio->observaciones }}</dd></div>
+                    @endif
+                    @if ($socio->estado === 'inactivo')
+                        <div><dt class="text-gray-500 dark:text-gray-400">Fecha de baja</dt><dd class="text-gray-900 dark:text-gray-100">{{ $socio->fecha_baja?->format('d-m-Y') }}</dd></div>
+                        <div class="sm:col-span-2"><dt class="text-gray-500 dark:text-gray-400">Motivo de la baja</dt><dd class="text-gray-900 dark:text-gray-100">{{ $socio->motivo_baja }}</dd></div>
                     @endif
                 </dl>
             </div>
@@ -114,6 +126,65 @@
 
                             <x-danger-button name="estado" value="rechazado">Rechazar</x-danger-button>
                         </div>
+                    </form>
+                </div>
+            @endif
+
+            @if ($socio->estado === 'rechazado')
+                <div class="p-6 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">Reabrir solicitud</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        Si la persona puede corregir el problema, reabre la solicitud. Volverá a "pendiente" y ella podrá editar sus datos y documentos. El motivo del rechazo se conserva.
+                    </p>
+                    <form method="POST" action="{{ route('socios.update', $socio) }}">
+                        @csrf
+                        @method('PATCH')
+                        <x-primary-button name="estado" value="pendiente">Reabrir solicitud</x-primary-button>
+                    </form>
+                </div>
+            @endif
+
+            @if ($socio->estado === 'activo')
+                <div class="p-6 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">Dar de baja</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        La persona pierde de inmediato los accesos de socio (certificados en línea y, más adelante, actas y arriendos). Podrás reactivarla después.
+                    </p>
+                    <form method="POST" action="{{ route('socios.update', $socio) }}" class="space-y-4"
+                          onsubmit="return confirm('¿Dar de baja a este socio?');">
+                        @csrf
+                        @method('PATCH')
+
+                        <div>
+                            <x-input-label for="motivo_baja" value="Motivo de la baja" />
+                            <textarea id="motivo_baja" name="motivo_baja" rows="2" required
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">{{ old('motivo_baja') }}</textarea>
+                            <x-input-error class="mt-2" :messages="$errors->get('motivo_baja')" />
+                        </div>
+
+                        <div>
+                            <x-input-label for="fecha_baja" value="Fecha de la baja" />
+                            <input id="fecha_baja" name="fecha_baja" type="date" required
+                                max="{{ now()->toDateString() }}" value="{{ old('fecha_baja', now()->toDateString()) }}"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                            <x-input-error class="mt-2" :messages="$errors->get('fecha_baja')" />
+                        </div>
+
+                        <x-danger-button name="estado" value="inactivo">Dar de baja</x-danger-button>
+                    </form>
+                </div>
+            @endif
+
+            @if ($socio->estado === 'inactivo')
+                <div class="p-6 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">Reactivar socio</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        Recupera sus accesos de socio y conserva su fecha de ingreso original ({{ $socio->fecha_ingreso?->format('d-m-Y') ?? 'sin fecha' }}). La baja queda registrada en la auditoría.
+                    </p>
+                    <form method="POST" action="{{ route('socios.update', $socio) }}">
+                        @csrf
+                        @method('PATCH')
+                        <x-primary-button name="estado" value="activo">Reactivar socio</x-primary-button>
                     </form>
                 </div>
             @endif

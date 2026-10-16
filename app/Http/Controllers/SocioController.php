@@ -47,6 +47,33 @@ class SocioController extends Controller
         return redirect()->route('socios.create')->with('status', 'solicitud-enviada');
     }
 
+    /** El vecino corrige su solicitud mientras está pendiente (incluye las reabiertas tras un rechazo). */
+    public function reenviar(Request $request)
+    {
+        $socio = $request->user()->socio;
+
+        abort_unless($socio && $socio->estado === 'pendiente', 403, 'Tu solicitud ya no se puede modificar.');
+
+        $request->merge(['rut' => RutChileno::normalizar($request->rut)]);
+
+        $datos = $request->validate([
+            'nombre_completo' => ['required', 'string', 'max:255'],
+            'rut' => ['required', 'string', 'max:12', new RutChileno, Rule::unique('socios', 'rut')->ignore($socio->id)],
+            'direccion' => ['required', 'string', 'max:255'],
+            'telefono' => ['required', 'string', 'max:20'],
+            'residente_desde' => $this->reglaResidencia(),
+            'carnet' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
+            'boleta' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
+        ], $this->mensajes());
+
+        $cambios = collect($datos)->except(['carnet', 'boleta'])->all();
+        $cambios += $this->reemplazarDocumentos($request, $socio);
+
+        $socio->update($cambios);
+
+        return redirect()->route('socios.create')->with('status', 'solicitud-corregida');
+    }
+
     // ---------- Dirigentes: revisar solicitudes ----------
 
     public function index(Request $request)
@@ -71,20 +98,48 @@ class SocioController extends Controller
         return view('socios.show', compact('socio'));
     }
 
+    /** Cambia el estado de la ficha respetando el ciclo de vida (Socio::TRANSICIONES). */
     public function update(Request $request, Socio $socio)
     {
-        $datos = $request->validate([
-            'estado' => ['required', 'in:por_firmar,activo,rechazado'],
-            'observaciones' => ['required_if:estado,rechazado', 'nullable', 'string', 'max:500'],
-        ]);
+        $destino = $request->validate([
+            'estado' => ['required', Rule::in(array_keys(Socio::ETIQUETAS))],
+        ])['estado'];
 
-        if ($datos['estado'] === 'activo' && ! $socio->fecha_ingreso) {
-            $datos['fecha_ingreso'] = now()->toDateString();
+        if (! $socio->puedePasarA($destino)) {
+            return back()->withErrors([
+                'estado' => 'No se puede pasar la ficha de «'.Socio::ETIQUETAS[$socio->estado].'» a «'.Socio::ETIQUETAS[$destino].'».',
+            ]);
         }
 
-        $socio->update($datos + ['revisado_por' => $request->user()->id]);
+        $datos = $request->validate(match ($destino) {
+            'rechazado' => [
+                'observaciones' => ['required', 'string', 'max:500'],
+            ],
+            'inactivo' => [
+                'motivo_baja' => ['required', 'string', 'max:500'],
+                'fecha_baja' => ['required', 'date', 'before_or_equal:today'],
+            ],
+            'por_firmar', 'activo' => [
+                'observaciones' => ['nullable', 'string', 'max:500'],
+            ],
+            default => [],
+        });
 
-        return redirect()->route('socios.show', $socio)->with('status', 'socio-actualizado');
+        $cambios = ['estado' => $destino] + $datos;
+
+        if ($destino === 'activo') {
+            if ($socio->estado === 'inactivo') {
+                // Reactivación: conserva la fecha de ingreso original y limpia los datos de la baja.
+                $cambios += ['motivo_baja' => null, 'fecha_baja' => null];
+            } else {
+                // Tras la firma del libro.
+                $cambios['fecha_ingreso'] = $socio->fecha_ingreso ?? now()->toDateString();
+            }
+        }
+
+        $socio->update($cambios + ['revisado_por' => $request->user()->id]);
+
+        return redirect()->route('socios.show', $socio)->with('status', 'socio-'.$destino);
     }
 
     public function documento(Socio $socio, string $tipo)
@@ -157,11 +212,24 @@ class SocioController extends Controller
         ], $this->mensajes());
 
         $cambios = collect($datos)->except(['carnet', 'boleta'])->all();
+        $cambios += $this->reemplazarDocumentos($request, $socio);
+
+        $socio->update($cambios);
+
+        return redirect()->route('socios.show', $socio)->with('status', 'socio-editado');
+    }
+
+    // ---------- Apoyo ----------
+
+    /** Guarda los archivos nuevos (si se subieron), borra los anteriores y devuelve las rutas a actualizar. */
+    private function reemplazarDocumentos(Request $request, Socio $socio): array
+    {
+        $rutas = [];
 
         foreach (['carnet' => 'socios/carnets', 'boleta' => 'socios/boletas'] as $campo => $carpeta) {
             if ($request->hasFile($campo)) {
                 $anterior = $socio->{$campo.'_path'};
-                $cambios[$campo.'_path'] = $request->file($campo)->store($carpeta);
+                $rutas[$campo.'_path'] = $request->file($campo)->store($carpeta);
 
                 if ($anterior) {
                     Storage::delete($anterior);
@@ -169,12 +237,8 @@ class SocioController extends Controller
             }
         }
 
-        $socio->update($cambios);
-
-        return redirect()->route('socios.show', $socio)->with('status', 'socio-editado');
+        return $rutas;
     }
-
-    // ---------- Reglas compartidas ----------
 
     private function reglasDatos(?Socio $socio = null): array
     {
