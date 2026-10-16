@@ -59,7 +59,7 @@ grupos y representante (RFS-38 a RFS-42, RFU-29 y RFU-30). Crear y editar grupos
 - Anular un ingreso con motivo obligatorio, sin borrarlo (RFS-67).
 - Saldo de caja: ingresos menos egresos menos devoluciones, sin contar lo anulado (RFS-68).
 
-### Bloque 2b: egresos y devoluciones.
+### Bloque 2b [Completado]: egresos y devoluciones.
 
 - Egresos con fecha, monto, concepto (servicios básicos o mantención), número de transacción, copia del comprobante y quién pagó (RFS-65).
 - Devolución de una cuota con motivo obligatorio, que descuenta del saldo de caja (RFS-66).
