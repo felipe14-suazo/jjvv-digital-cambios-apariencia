@@ -40,6 +40,12 @@
                     @endif
 
                     @if (Auth::user()->hasRole('presidente', 'secretario'))
+                        <x-nav-link :href="route('grupos.index')" :active="request()->routeIs('grupos.*')">
+                            Grupos
+                        </x-nav-link>
+                    @endif
+
+                    @if (Auth::user()->hasRole('presidente', 'secretario'))
                         <x-nav-link :href="route('parametros.index')" :active="request()->routeIs('parametros.*')">
                             Parámetros
                         </x-nav-link>
@@ -126,6 +132,12 @@
             @if (Auth::user()->esSocioActivo())
                 <x-responsive-nav-link :href="route('certificados.index')" :active="request()->routeIs('certificados.*')">
                     Mis certificados
+                </x-responsive-nav-link>
+            @endif
+
+            @if (Auth::user()->hasRole('presidente', 'secretario'))
+                <x-responsive-nav-link :href="route('grupos.index')" :active="request()->routeIs('grupos.*')">
+                    Grupos
                 </x-responsive-nav-link>
             @endif
 

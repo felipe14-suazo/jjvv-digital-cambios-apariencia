@@ -6,17 +6,30 @@
     <div class="py-12">
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white p-6 shadow sm:rounded-lg">
-                <form method="POST" action="{{ route('ingresos.store') }}" class="space-y-4">
+                <form method="POST" action="{{ route('ingresos.store') }}" class="space-y-4"
+                      x-data="{ concepto: @js(old('concepto', '')) }">
                     @csrf
 
                     <div>
                         <x-input-label for="concepto" value="Concepto" />
-                        <select id="concepto" name="concepto" class="mt-1 block w-full rounded-md border-gray-300">
+                        <select id="concepto" name="concepto" x-model="concepto" class="mt-1 block w-full rounded-md border-gray-300">
+                            <option value="">Seleccionar</option>
                             @foreach ($conceptos as $valor => $etiqueta)
                                 <option value="{{ $valor }}" @selected(old('concepto') === $valor)>{{ $etiqueta }}</option>
                             @endforeach
                         </select>
                         <x-input-error :messages="$errors->get('concepto')" class="mt-2" />
+                    </div>
+
+                    <div x-show="concepto === 'cuota_socios'" x-cloak>
+                        <x-input-label for="tipo_cuota" value="Tipo de cuota" />
+                        <select id="tipo_cuota" name="tipo_cuota" class="mt-1 block w-full rounded-md border-gray-300">
+                            <option value="">Seleccionar</option>
+                            @foreach ($tiposCuota as $valor => $etiqueta)
+                                <option value="{{ $valor }}" @selected(old('tipo_cuota') === $valor)>{{ $etiqueta }}</option>
+                            @endforeach
+                        </select>
+                        <x-input-error :messages="$errors->get('tipo_cuota')" class="mt-2" />
                     </div>
 
                     <div>

@@ -11,6 +11,7 @@ use App\Http\Controllers\VerificacionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ParametroController;
 use App\Http\Controllers\IngresoController;
+use App\Http\Controllers\GrupoController;
 
 // ---------- Público ----------
 Route::get('/', function () {
@@ -61,6 +62,8 @@ Route::middleware(['auth', 'role:presidente,tesorero'])->group(function () {
     Route::get('/ingresos', [IngresoController::class, 'index'])->name('ingresos.index');
     Route::get('/ingresos/crear', [IngresoController::class, 'create'])->name('ingresos.create');
     Route::post('/ingresos', [IngresoController::class, 'store'])->name('ingresos.store');
+    Route::post('/ingresos/{ingreso}/anular', [IngresoController::class, 'anular'])
+        ->whereNumber('ingreso')->name('ingresos.anular');
 });
 
 // ---------- Presidente y secretario ----------
@@ -86,6 +89,18 @@ Route::middleware(['auth', 'role:presidente,secretario'])->group(function () {
         Route::post('/', [CitaController::class, 'store'])->name('store');
         Route::patch('/{cita}/liberar', [CitaController::class, 'liberar'])->name('liberar');
         Route::delete('/{cita}', [CitaController::class, 'destroy'])->name('destroy');
+    });
+
+    // Grupos y organizaciones
+    Route::prefix('grupos')->name('grupos.')->group(function () {
+        Route::get('/', [GrupoController::class, 'index'])->name('index');
+        Route::post('/', [GrupoController::class, 'store'])->name('store');
+        Route::get('/{grupo}', [GrupoController::class, 'show'])->whereNumber('grupo')->name('show');
+        Route::put('/{grupo}', [GrupoController::class, 'update'])->whereNumber('grupo')->name('update');
+        Route::post('/{grupo}/representante', [GrupoController::class, 'asignarRepresentante'])
+            ->whereNumber('grupo')->name('representante');
+        Route::put('/{grupo}/contacto', [GrupoController::class, 'actualizarContacto'])
+            ->whereNumber('grupo')->name('contacto');
     });
 
     // Certificados
