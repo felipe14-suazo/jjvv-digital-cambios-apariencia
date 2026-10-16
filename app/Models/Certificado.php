@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Certificado extends Model
 {
@@ -31,6 +32,7 @@ class Certificado extends Model
     protected $fillable = [
         'tipo', 'user_id', 'socio_id', 'nombre_solicitante', 'rut_solicitante',
         'direccion', 'dirigido_a', 'aporte', 'documentos_verificados', 'observaciones',
+        'numero_transaccion', 'comprobante_path',
     ];
 
     protected function casts(): array
@@ -38,6 +40,7 @@ class Certificado extends Model
         return [
             'fecha_emision' => 'date',
             'fecha_vencimiento' => 'date',
+            'descarga_disponible_hasta' => 'datetime',
             'documentos_verificados' => 'boolean',
         ];
     }
@@ -77,6 +80,48 @@ class Certificado extends Model
     public function otorgante(): BelongsTo
     {
         return $this->belongsTo(User::class, 'otorgado_por');
+    }
+
+    public function descargas(): HasMany
+    {
+        return $this->hasMany(DescargaCertificado::class);
+    }
+
+    public function ingresos(): HasMany
+    {
+        return $this->hasMany(Ingreso::class);
+    }
+
+    /** El certificado de socio no tiene plazo (RFS-20); el de residencia sí (RFS-24). */
+    public function puedeDescargarse(): bool
+    {
+        if ($this->estado !== 'emitido') {
+            return false;
+        }
+
+        if ($this->tipo === 'socio') {
+            return true;
+        }
+
+        return $this->descarga_disponible_hasta?->isFuture() ?? false;
+    }
+
+    /** Registra el pago de la solicitud como ingreso, sin requerir acceso a finanzas (RFS-37). */
+    public function registrarIngreso(User $por): void
+    {
+        if ($this->tipo !== 'residencia' || $this->ingresos()->exists()) {
+            return;
+        }
+
+        Ingreso::create([
+            'concepto' => 'certificados',
+            'fecha_pago' => now()->toDateString(),
+            'monto' => Parametro::entero('certificado_residencia_valor'),
+            'medio_pago' => 'transferencia',
+            'numero_transaccion' => $this->numero_transaccion,
+            'certificado_id' => $this->id,
+            'registrado_por' => $por->id,
+        ]);
     }
 
     public function etiquetaTipo(): string
@@ -129,6 +174,7 @@ class Certificado extends Model
                         'folio' => sprintf('%d-%04d', $anio, $correlativo),
                         'fecha_emision' => now()->toDateString(),
                         'fecha_vencimiento' => now()->addDays(Parametro::entero('certificado_vigencia_dias'))->toDateString(),
+                        'descarga_disponible_hasta' => now()->addDays(Parametro::entero('certificado_plazo_descarga_dias')),
                         'otorgado_por' => $por->id,
                     ])->save();
                 });
@@ -149,6 +195,9 @@ class Certificado extends Model
 
     public function toPdf()
     {
-        return Pdf::loadView('certificados.pdf', ['c' => $this])->setPaper('letter');
+        return Pdf::loadView('certificados.pdf', [
+            'c' => $this,
+            'junta' => config('jjvv.nombre'),
+        ])->setPaper('letter');
     }
 }

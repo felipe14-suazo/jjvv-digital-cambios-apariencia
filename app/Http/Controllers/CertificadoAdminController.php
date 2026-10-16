@@ -8,6 +8,7 @@ use App\Rules\RutChileno;
 use App\Models\Parametro;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 
 /** Dirigentes: revisan solicitudes, emiten certificados presenciales y los anulan. */
 class CertificadoAdminController extends Controller
@@ -71,7 +72,7 @@ class CertificadoAdminController extends Controller
 
     public function show(Certificado $certificado)
     {
-        $certificado->load(['socio', 'solicitante', 'otorgante']);
+        $certificado->load(['socio', 'solicitante', 'otorgante', 'descargas.usuario']);
 
         return view('certificados.admin.show', [
             'certificado' => $certificado,
@@ -79,7 +80,7 @@ class CertificadoAdminController extends Controller
         ]);
     }
 
-    /** Valida manualmente una solicitud y la emite (RFU-10). */
+    /** Valida el pago, emite y registra el ingreso (RFS-21, RFS-37). */
     public function emitir(Request $request, Certificado $certificado)
     {
         abort_unless($certificado->estado === 'solicitado', 422, 'Solo se pueden emitir solicitudes pendientes.');
@@ -88,14 +89,30 @@ class CertificadoAdminController extends Controller
 
         $datos = $request->validate($this->reglasComunes($certificado->tipo));
 
+        if ($certificado->tipo === 'residencia') {
+            $request->validate(['pago_verificado' => ['accepted']]);
+        }
+
         $certificado->fill([
             ...$datos,
             'documentos_verificados' => $request->boolean('documentos_verificados'),
         ])->save();
 
         $certificado->emitir($request->user());
+        $certificado->registrarIngreso($request->user());
 
         return redirect()->route('admin.certificados.show', $certificado)->with('status', 'certificado-emitido');
+    }
+
+    /** Solo presidente y secretario pueden abrir el comprobante de pago. */
+    public function comprobante(Certificado $certificado)
+    {
+        abort_unless(
+            $certificado->comprobante_path && Storage::disk('local')->exists($certificado->comprobante_path),
+            404
+        );
+
+        return Storage::disk('local')->response($certificado->comprobante_path);
     }
 
     public function rechazar(Request $request, Certificado $certificado)

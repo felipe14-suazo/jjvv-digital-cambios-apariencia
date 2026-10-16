@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Certificado;
 use App\Rules\RutChileno;
+use App\Models\DescargaCertificado;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -51,6 +52,7 @@ class CertificadoController extends Controller
                 'socio_id' => $socio->id,
             ];
         } else {
+            // Residencia: pago obligatorio por transferencia con comprobante (RFS-19).
             $request->merge(['rut_solicitante' => RutChileno::normalizar($request->rut_solicitante)]);
 
             $datos = $request->validate([
@@ -58,7 +60,12 @@ class CertificadoController extends Controller
                 'rut_solicitante' => ['required', 'string', 'max:12', new RutChileno],
                 'direccion' => ['required', 'string', 'max:255'],
                 'dirigido_a' => ['required', 'string', 'max:255'],
+                'numero_transaccion' => ['required', 'string', 'max:50'],
+                'comprobante' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
             ]);
+
+            $datos['comprobante_path'] = $request->file('comprobante')->store('comprobantes', 'local');
+            unset($datos['comprobante']);
             $datos['socio_id'] = $socio?->id;
         }
 
@@ -73,6 +80,22 @@ class CertificadoController extends Controller
             $certificado->user_id === $request->user()->id && $certificado->estado === 'emitido',
             404
         );
+
+        if ($certificado->tipo === 'residencia') {
+            abort_unless(
+                $certificado->puedeDescargarse(),
+                410,
+                'El plazo para descargar este certificado venció. Puedes retirarlo en la sede.'
+            );
+
+            // Solo se registran las descargas del certificado de residencia (decisión del proyecto).
+            DescargaCertificado::create([
+                'certificado_id' => $certificado->id,
+                'user_id' => $request->user()->id,
+                'ip' => $request->ip(),
+                'descargado_en' => now(),
+            ]);
+        }
 
         return $certificado->toPdf()->stream($certificado->nombreArchivoPdf());
     }

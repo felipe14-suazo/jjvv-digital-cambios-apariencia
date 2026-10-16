@@ -35,7 +35,7 @@
     @endif
 
     <div class="encabezado">
-        <div class="org">{{ \App\Models\Parametro::cadena('nombre') }}</div>
+        <div class="org">{{ $junta }}</div>
     </div>
 
     <h1>{{ $titulo }}</h1>
@@ -43,7 +43,7 @@
 
     @if ($c->tipo === 'socio')
         <p>
-            La directiva de la {{ \App\Models\Parametro::cadena('nombre') }} certifica que el/la vecino/a
+            La directiva de la {{ $junta }} certifica que el/la vecino/a
             <strong>{{ $c->nombre_solicitante }}</strong>, cédula de identidad N° <strong>{{ $c->rut_solicitante }}</strong>,
             domiciliado/a en {{ $c->direccion }}, es <strong>socio/a activo/a</strong> de esta organización
             @if ($c->socio?->fecha_ingreso)
@@ -54,7 +54,7 @@
         </p>
     @else
         <p>
-            La directiva de la {{ \App\Models\Parametro::cadena('nombre') }} certifica que el/la vecino/a
+            La directiva de la {{ $junta }} certifica que el/la vecino/a
             <strong>{{ $c->nombre_solicitante }}</strong>, cédula de identidad N° <strong>{{ $c->rut_solicitante }}</strong>,
             es <strong>residente</strong> de la jurisdicción de esta organización, con domicilio en {{ $c->direccion }}.
         </p>
@@ -78,7 +78,7 @@
         <div class="linea"></div>
         @if ($c->otorgante)
             <strong>{{ $c->otorgante->name }}</strong><br>
-            {{ $c->otorgante->nombreRol() }} - {{ \App\Models\Parametro::cadena('nombre') }}
+            {{ $c->otorgante->nombreRol() }} - {{ $junta }}
         @else
             Firma y timbre de la directiva
         @endif

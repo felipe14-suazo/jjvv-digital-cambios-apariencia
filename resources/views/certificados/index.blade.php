@@ -24,7 +24,7 @@
                     El aporte voluntario es de ${{ number_format(\App\Models\Parametro::entero('certificado_residencia_valor'), 0, ',', '.') }}.
                 </p>
 
-                <form method="POST" action="{{ route('certificados.store') }}" class="mt-6 space-y-6"
+                <form method="POST" action="{{ route('certificados.store') }}" enctype="multipart/form-data" class="mt-6 space-y-6"
                       x-data="{ tipo: @js(old('tipo', 'residencia')) }">
                     @csrf
 
@@ -72,6 +72,18 @@
                         <x-input-error class="mt-2" :messages="$errors->get('dirigido_a')" />
                     </div>
 
+                    <div>    
+                        <x-input-label for="numero_transaccion" value="Número de transacción (transferencia de $1.000)" />    
+                        <x-text-input id="numero_transaccion" name="numero_transaccion" type="text" class="mt-1 block w-full" :value="old('numero_transaccion')" />    
+                        <x-input-error :messages="$errors->get('numero_transaccion')" class="mt-2" />
+                    </div>
+
+                    <div class="mt-4">    
+                        <x-input-label for="comprobante" value="Comprobante de transferencia (PDF, JPG o PNG, máx. 5 MB)" />    
+                        <input id="comprobante" name="comprobante" type="file" accept=".pdf,.jpg,.jpeg,.png" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />    
+                        <x-input-error :messages="$errors->get('comprobante')" class="mt-2" />
+                    </div>
+
                     <x-primary-button>Enviar solicitud</x-primary-button>
                 </form>
             </div>
@@ -102,8 +114,19 @@
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-right">
-                                    @if ($c->estado === 'emitido')
-                                        <a href="{{ route('certificados.descargar', $c) }}" target="_blank" class="underline text-indigo-600 dark:text-indigo-400">Descargar PDF</a>
+                                    @if ($c->puedeDescargarse())
+                                        <a href="{{ route('certificados.descargar', $c) }}" target="_blank" class="underline text-indigo-600 dark:text-indigo-400">
+                                            Descargar PDF
+                                        </a>
+                                        @if ($c->tipo === 'residencia')
+                                            <span class="block text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                Disponible hasta {{ $c->descarga_disponible_hasta->format('d-m-Y H:i') }}
+                                            </span>
+                                        @endif
+                                    @else
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                                            Descarga no disponible. Puedes retirarlo en la sede.
+                                        </span>
                                     @endif
                                 </td>
                             </tr>

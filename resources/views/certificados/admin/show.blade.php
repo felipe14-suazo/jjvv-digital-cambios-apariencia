@@ -60,6 +60,20 @@
                 </div>
             </div>
 
+            {{-- ===== Historial de Descargas ===== --}}
+            <div class="p-6 bg-white dark:bg-gray-800 shadow sm:rounded-lg mt-6">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-3">Descargas</h3>
+                @forelse ($c->descargas as $descarga)
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        {{ $descarga->descargado_en->format('d-m-Y H:i') }}
+                        · {{ $descarga->usuario?->name ?? 'Usuario eliminado' }}
+                        · IP {{ $descarga->ip }}
+                    </p>
+                @empty
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Sin descargas registradas.</p>
+                @endforelse
+            </div>
+
             {{-- ===== Revisión y emisión ===== --}}
             @if ($c->estado === 'solicitado')
                 <div class="p-6 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
@@ -108,6 +122,27 @@
                                     <span>Verifiqué en persona el carnet de identidad y la boleta de luz o agua.</span>
                                 </label>
                                 <x-input-error class="mt-2" :messages="$errors->get('documentos_verificados')" />
+                            </div>
+                        @endif
+                        
+                        @if ($c->tipo === 'residencia')
+                            {{-- Datos del comprobante subido por el socio --}}
+                            @if ($c->comprobante_path)
+                                <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-md text-sm">
+                                    <p class="text-gray-700 dark:text-gray-300">
+                                        <a href="{{ route('admin.certificados.comprobante', $c) }}" target="_blank" class="underline text-indigo-600 dark:text-indigo-400 font-medium">Ver comprobante</a>
+                                        · N° de transacción: <span class="font-mono font-semibold">{{ $c->numero_transaccion }}</span>
+                                    </p>
+                                </div>
+                            @endif
+
+                            <div>
+                                <label class="inline-flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+                                    <input type="checkbox" name="pago_verificado" value="1" required @checked(old('pago_verificado'))
+                                           class="mt-0.5 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                    <span>Confirmo que el pago de $1.000 figura en la cuenta.</span>
+                                </label>
+                                <x-input-error class="mt-2" :messages="$errors->get('pago_verificado')" />
                             </div>
                         @endif
 

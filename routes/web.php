@@ -98,6 +98,8 @@ Route::middleware(['auth', 'role:presidente,secretario'])->group(function () {
         Route::get('/', [CertificadoAdminController::class, 'index'])->name('index');
         Route::get('/crear', [CertificadoAdminController::class, 'create'])->name('create');
         Route::post('/', [CertificadoAdminController::class, 'store'])->name('store');
+        Route::get('/{certificado}/comprobante', [CertificadoAdminController::class, 'comprobante'])
+            ->whereNumber('certificado')->name('comprobante');
         Route::get('/{certificado}', [CertificadoAdminController::class, 'show'])->whereNumber('certificado')->name('show');
         Route::post('/{certificado}/emitir', [CertificadoAdminController::class, 'emitir'])->whereNumber('certificado')->name('emitir');
         Route::post('/{certificado}/rechazar', [CertificadoAdminController::class, 'rechazar'])->whereNumber('certificado')->name('rechazar');
