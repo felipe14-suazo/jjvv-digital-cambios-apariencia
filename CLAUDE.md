@@ -6,6 +6,7 @@ Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-s
 
 ## First Rules
 - Do not install anything that is not necessary for the task.
+- Do not run tests. Let the user test it.
 - Generate only plain text for coding. Do not generate code files unless the user confirms it.
 - Present a plan first, followed by a step-by-step guide with code.
 - Treat REQUIREMENTS.md as the source of truth for RFU, RFS, and permissions.
