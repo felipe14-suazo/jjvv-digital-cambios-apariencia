@@ -83,6 +83,8 @@ Route::middleware(['auth', 'role:presidente,secretario'])->group(function () {
         Route::put('/{socio}', [SocioController::class, 'actualizar'])->whereNumber('socio')->name('actualizar');
         Route::patch('/{socio}', [SocioController::class, 'update'])->whereNumber('socio')->name('update');
         Route::get('/{socio}/documento/{tipo}', [SocioController::class, 'documento'])->whereNumber('socio')->name('documento');
+        Route::post('/{socio}/cuenta', [SocioController::class, 'crearCuenta'])
+            ->whereNumber('socio')->name('cuenta');
     });
 
     // Agenda de firmas
@@ -105,6 +107,8 @@ Route::middleware(['auth', 'role:presidente,secretario'])->group(function () {
         Route::post('/{certificado}/rechazar', [CertificadoAdminController::class, 'rechazar'])->whereNumber('certificado')->name('rechazar');
         Route::post('/{certificado}/anular', [CertificadoAdminController::class, 'anular'])->whereNumber('certificado')->name('anular');
         Route::get('/{certificado}/pdf', [CertificadoAdminController::class, 'pdf'])->whereNumber('certificado')->name('pdf');
+        Route::post('/{certificado}/retirar', [CertificadoAdminController::class, 'retirar'])
+            ->whereNumber('certificado')->name('retirar');
     });
 
     // Parámetros del sistema

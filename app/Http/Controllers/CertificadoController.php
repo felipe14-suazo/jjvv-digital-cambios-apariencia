@@ -65,6 +65,7 @@ class CertificadoController extends Controller
             ]);
 
             $datos['comprobante_path'] = $request->file('comprobante')->store('comprobantes', 'local');
+            $datos['medio_pago'] = 'transferencia';
             unset($datos['comprobante']);
             $datos['socio_id'] = $socio?->id;
         }
@@ -94,6 +95,10 @@ class CertificadoController extends Controller
                 'user_id' => $request->user()->id,
                 'ip' => $request->ip(),
                 'descargado_en' => now(),
+            ]);
+            
+            $certificado->registrarAuditoria('descargado', [
+                'descarga' => ['antes' => null, 'despues' => ['ip' => $request->ip()]],
             ]);
         }
 

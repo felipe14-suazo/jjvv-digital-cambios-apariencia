@@ -13,11 +13,12 @@ class Auditoria extends Model
 
     protected $guarded = [];
 
-    /** Filtros disponibles en la pantalla de auditoría. */
+    /** Filtros disponibles en la pantalla de auditoría (RFS-87). */
     public const MODELOS = [
         'socio' => Socio::class,
         'certificado' => Certificado::class,
         'usuario' => User::class,
+        'finanzas' => Ingreso::class,
     ];
 
     protected function casts(): array

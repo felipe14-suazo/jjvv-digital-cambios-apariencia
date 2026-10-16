@@ -15,6 +15,7 @@
             'certificado-emitido' => 'El certificado fue emitido.',
             'certificado-rechazado' => 'La solicitud fue rechazada.',
             'certificado-anulado' => 'El certificado fue anulado.',
+            'certificado-retirado' => 'El retiro fue registrado.',
         ];
     @endphp
 
@@ -41,11 +42,20 @@
                     @if ($c->socio)
                         <div><dt class="text-gray-500 dark:text-gray-400">Ficha de socio</dt><dd><a class="underline text-indigo-600 dark:text-indigo-400" href="{{ route('socios.show', $c->socio) }}">{{ $c->socio->nombre_completo }}</a></dd></div>
                     @endif
+                    @if ($c->medio_pago || $c->numero_transaccion)
+                        <div>
+                            <dt class="text-gray-500 dark:text-gray-400">Pago</dt>
+                            <dd class="text-gray-900 dark:text-gray-100">
+                                {{ \App\Models\Ingreso::MEDIOS[$c->medio_pago] ?? '—' }}
+                                @if ($c->talonario) · talonario {{ $c->talonario }} @endif
+                                @if ($c->numero_transaccion) · transacción {{ $c->numero_transaccion }} @endif
+                            </dd>
+                        </div>
+                    @endif
                     @if ($c->estado !== 'solicitado' && $c->estado !== 'rechazado')
                         <div><dt class="text-gray-500 dark:text-gray-400">Emitido el</dt><dd class="text-gray-900 dark:text-gray-100">{{ $c->fecha_emision?->format('d-m-Y') }}</dd></div>
                         <div><dt class="text-gray-500 dark:text-gray-400">Vence el</dt><dd class="text-gray-900 dark:text-gray-100">{{ $c->fecha_vencimiento?->format('d-m-Y') }}</dd></div>
                         <div><dt class="text-gray-500 dark:text-gray-400">Otorgado por</dt><dd class="text-gray-900 dark:text-gray-100">{{ $c->otorgante?->name }} ({{ $c->otorgante?->nombreRol() }})</dd></div>
-                        <div><dt class="text-gray-500 dark:text-gray-400">Aporte</dt><dd class="text-gray-900 dark:text-gray-100">{{ $c->aporte !== null ? '$'.number_format($c->aporte, 0, ',', '.') : '—' }}</dd></div>
                         <div><dt class="text-gray-500 dark:text-gray-400">Código de verificación</dt><dd class="text-gray-900 dark:text-gray-100 font-mono">{{ $c->codigoFormateado() }}</dd></div>
                     @endif
                     @if ($c->observaciones)
@@ -53,28 +63,17 @@
                     @endif
                 </dl>
 
-                <div class="mt-4">
-                    <a href="{{ route('admin.certificados.pdf', $c) }}" target="_blank" class="underline text-sm text-indigo-600 dark:text-indigo-400">
+                <div class="mt-4 flex flex-wrap gap-4 text-sm">
+                    <a href="{{ route('admin.certificados.pdf', $c) }}" target="_blank" class="underline text-indigo-600 dark:text-indigo-400">
                         {{ $c->estado === 'solicitado' ? 'Ver PDF de revisión (borrador)' : 'Ver PDF' }}
                     </a>
+                    @if ($c->comprobante_path)
+                        <a href="{{ route('admin.certificados.comprobante', $c) }}" target="_blank" class="underline text-indigo-600 dark:text-indigo-400">Ver comprobante</a>
+                    @endif
                 </div>
             </div>
 
-            {{-- ===== Historial de Descargas ===== --}}
-            <div class="p-6 bg-white dark:bg-gray-800 shadow sm:rounded-lg mt-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-3">Descargas</h3>
-                @forelse ($c->descargas as $descarga)
-                    <p class="text-sm text-gray-600 dark:text-gray-400">
-                        {{ $descarga->descargado_en->format('d-m-Y H:i') }}
-                        · {{ $descarga->usuario?->name ?? 'Usuario eliminado' }}
-                        · IP {{ $descarga->ip }}
-                    </p>
-                @empty
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Sin descargas registradas.</p>
-                @endforelse
-            </div>
-
-            {{-- ===== Revisión y emisión ===== --}}
+            {{-- ===== Revisión y emisión de solicitudes en línea ===== --}}
             @if ($c->estado === 'solicitado')
                 <div class="p-6 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">Revisión</h3>
@@ -101,20 +100,22 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('direccion')" />
                             </div>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <x-input-label for="dirigido_a" value="Dirigido a" />
-                                <input id="dirigido_a" name="dirigido_a" type="text" class="{{ $cls }}" required value="{{ old('dirigido_a', $c->dirigido_a) }}">
-                                <x-input-error class="mt-2" :messages="$errors->get('dirigido_a')" />
-                            </div>
-                            <div>
-                                <x-input-label for="aporte" value="Aporte voluntario recibido (CLP)" />
-                                <input id="aporte" name="aporte" type="number" min="0" step="1" class="{{ $cls }}" value="{{ old('aporte', $aporteSugerido) }}">
-                                <x-input-error class="mt-2" :messages="$errors->get('aporte')" />
-                            </div>
+                        <div>
+                            <x-input-label for="dirigido_a" value="Dirigido a" />
+                            <input id="dirigido_a" name="dirigido_a" type="text" class="{{ $cls }}" required value="{{ old('dirigido_a', $c->dirigido_a) }}">
+                            <x-input-error class="mt-2" :messages="$errors->get('dirigido_a')" />
                         </div>
 
                         @if ($c->tipo === 'residencia')
+                            <div>
+                                <label class="inline-flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+                                    <input type="checkbox" name="pago_verificado" value="1" @checked(old('pago_verificado'))
+                                           class="mt-0.5 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                    <span>Verifiqué en el comprobante que la transferencia de $1.000 figura en la cuenta.</span>
+                                </label>
+                                <x-input-error class="mt-2" :messages="$errors->get('pago_verificado')" />
+                            </div>
+
                             <div>
                                 <label class="inline-flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
                                     <input type="checkbox" name="documentos_verificados" value="1" @checked(old('documentos_verificados'))
@@ -122,27 +123,6 @@
                                     <span>Verifiqué en persona el carnet de identidad y la boleta de luz o agua.</span>
                                 </label>
                                 <x-input-error class="mt-2" :messages="$errors->get('documentos_verificados')" />
-                            </div>
-                        @endif
-                        
-                        @if ($c->tipo === 'residencia')
-                            {{-- Datos del comprobante subido por el socio --}}
-                            @if ($c->comprobante_path)
-                                <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-md text-sm">
-                                    <p class="text-gray-700 dark:text-gray-300">
-                                        <a href="{{ route('admin.certificados.comprobante', $c) }}" target="_blank" class="underline text-indigo-600 dark:text-indigo-400 font-medium">Ver comprobante</a>
-                                        · N° de transacción: <span class="font-mono font-semibold">{{ $c->numero_transaccion }}</span>
-                                    </p>
-                                </div>
-                            @endif
-
-                            <div>
-                                <label class="inline-flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
-                                    <input type="checkbox" name="pago_verificado" value="1" required @checked(old('pago_verificado'))
-                                           class="mt-0.5 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-indigo-600 shadow-sm focus:ring-indigo-500">
-                                    <span>Confirmo que el pago de $1.000 figura en la cuenta.</span>
-                                </label>
-                                <x-input-error class="mt-2" :messages="$errors->get('pago_verificado')" />
                             </div>
                         @endif
 
@@ -156,6 +136,51 @@
                         <x-input-error class="mt-2" :messages="$errors->get('observaciones')" />
                         <x-danger-button>Rechazar solicitud</x-danger-button>
                     </form>
+                </div>
+            @endif
+
+            {{-- ===== Retiro presencial (RFS-26, RFS-32) ===== --}}
+            @if ($c->tipo === 'residencia' && $c->estado === 'emitido')
+                <div class="p-6 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">Retiro en la sede</h3>
+
+                    @if ($c->fecha_retiro)
+                        <p class="text-sm text-gray-700 dark:text-gray-300">Retirado el {{ $c->fecha_retiro->format('d-m-Y') }}.</p>
+                    @elseif ($c->descargas->isNotEmpty())
+                        <p class="text-sm text-gray-700 dark:text-gray-300">
+                            El socio descargó este certificado el {{ $c->descargas->first()->descargado_en->format('d-m-Y H:i') }}.
+                            No puede retirarlo en sede; debe solicitar uno nuevo y pagarlo nuevamente.
+                        </p>
+                    @else
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            El socio no descargó el certificado. Registra la fecha en que lo retira.
+                        </p>
+                        <form method="POST" action="{{ route('admin.certificados.retirar', $c) }}" class="flex flex-wrap items-end gap-3">
+                            @csrf
+                            <div>
+                                <x-input-label for="fecha_retiro" value="Fecha de retiro" />
+                                <input id="fecha_retiro" name="fecha_retiro" type="date" value="{{ today()->toDateString() }}" class="{{ $cls }}" required>
+                                <x-input-error class="mt-2" :messages="$errors->get('fecha_retiro')" />
+                            </div>
+                            <x-primary-button>Registrar retiro</x-primary-button>
+                        </form>
+                    @endif
+                </div>
+            @endif
+
+            {{-- ===== Descargas registradas (RFS-25, RFS-27) ===== --}}
+            @if ($c->tipo === 'residencia' && $c->estado === 'emitido')
+                <div class="p-6 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-3">Descargas</h3>
+                    @forelse ($c->descargas as $descarga)
+                        <p class="text-sm text-gray-700 dark:text-gray-300">
+                            {{ $descarga->descargado_en->format('d-m-Y H:i') }}
+                            · {{ $descarga->usuario?->name ?? 'Usuario eliminado' }}
+                            · IP {{ $descarga->ip }}
+                        </p>
+                    @empty
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Sin descargas registradas.</p>
+                    @endforelse
                 </div>
             @endif
 

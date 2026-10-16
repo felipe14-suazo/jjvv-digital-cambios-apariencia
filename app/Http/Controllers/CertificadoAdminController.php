@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Certificado;
+use App\Models\Ingreso;
 use App\Models\Socio;
 use App\Rules\RutChileno;
-use App\Models\Parametro;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
-/** Dirigentes: revisan solicitudes, emiten certificados presenciales y los anulan. */
+/** Dirigentes: revisan solicitudes, emiten en ventanilla, registran retiros y anulan certificados. */
 class CertificadoAdminController extends Controller
 {
     public function index(Request $request)
@@ -37,11 +37,10 @@ class CertificadoAdminController extends Controller
         return view('certificados.admin.create', [
             'sociosActivos' => Socio::where('estado', 'activo')->orderBy('nombre_completo')->get(),
             'socioSel' => $request->socio ? Socio::where('estado', 'activo')->find($request->socio) : null,
-            'aporteSugerido' => Parametro::entero('certificado_residencia_valor'),
         ]);
     }
 
-    /** Emisión directa en ventanilla (trámite presencial). */
+    /** Emisión directa en ventanilla: registra el pago y el ingreso (RFS-27). */
     public function store(Request $request)
     {
         $request->merge(['rut_solicitante' => RutChileno::normalizar($request->rut_solicitante)]);
@@ -50,6 +49,7 @@ class CertificadoAdminController extends Controller
             'tipo' => ['required', Rule::in(array_keys(Certificado::TIPOS))],
             'socio_id' => ['nullable', 'exists:socios,id'],
             ...$this->reglasComunes($request->tipo),
+            ...$this->reglasPagoVentanilla($request->tipo),
         ]);
 
         if ($datos['tipo'] === 'socio') {
@@ -61,11 +61,15 @@ class CertificadoAdminController extends Controller
             }
         }
 
+        // Campos de control de la validación: no se guardan en el certificado.
+        unset($datos['residencia_6_meses'], $datos['pago_verificado']);
+
         $certificado = Certificado::create([
             ...$datos,
             'documentos_verificados' => $request->boolean('documentos_verificados'),
         ]);
         $certificado->emitir($request->user());
+        $certificado->registrarIngreso($request->user());
 
         return redirect()->route('admin.certificados.show', $certificado)->with('status', 'certificado-emitido');
     }
@@ -74,13 +78,10 @@ class CertificadoAdminController extends Controller
     {
         $certificado->load(['socio', 'solicitante', 'otorgante', 'descargas.usuario']);
 
-        return view('certificados.admin.show', [
-            'certificado' => $certificado,
-            'aporteSugerido' => Parametro::entero('certificado_residencia_valor'),
-        ]);
+        return view('certificados.admin.show', ['certificado' => $certificado]);
     }
 
-    /** Valida el pago, emite y registra el ingreso (RFS-21, RFS-37). */
+    /** Valida la solicitud en línea (pago y documentos) y la emite (RFS-21). */
     public function emitir(Request $request, Certificado $certificado)
     {
         abort_unless($certificado->estado === 'solicitado', 422, 'Solo se pueden emitir solicitudes pendientes.');
@@ -104,15 +105,29 @@ class CertificadoAdminController extends Controller
         return redirect()->route('admin.certificados.show', $certificado)->with('status', 'certificado-emitido');
     }
 
-    /** Solo presidente y secretario pueden abrir el comprobante de pago. */
-    public function comprobante(Certificado $certificado)
+    /** Registra el retiro presencial de un certificado que no fue descargado (RFS-26, RFS-32). */
+    public function retirar(Request $request, Certificado $certificado)
     {
         abort_unless(
-            $certificado->comprobante_path && Storage::disk('local')->exists($certificado->comprobante_path),
-            404
+            $certificado->tipo === 'residencia' && $certificado->estado === 'emitido',
+            422,
+            'Solo se pueden registrar retiros de certificados de residencia emitidos.'
+        );
+        abort_if($certificado->fecha_retiro !== null, 422, 'Este certificado ya fue retirado.');
+        abort_if(
+            $certificado->descargas()->exists(),
+            422,
+            'El socio descargó este certificado. Debe solicitar uno nuevo y pagarlo nuevamente.'
         );
 
-        return Storage::disk('local')->response($certificado->comprobante_path);
+        $datos = $request->validate([
+            'fecha_retiro' => ['required', 'date', 'before_or_equal:today'],
+        ]);
+
+        // El retiro no cambia la vigencia (RFS-31): solo se registra la fecha.
+        $certificado->forceFill(['fecha_retiro' => $datos['fecha_retiro']])->save();
+
+        return redirect()->route('admin.certificados.show', $certificado)->with('status', 'certificado-retirado');
     }
 
     public function rechazar(Request $request, Certificado $certificado)
@@ -137,10 +152,21 @@ class CertificadoAdminController extends Controller
         return redirect()->route('admin.certificados.show', $certificado)->with('status', 'certificado-anulado');
     }
 
-    /** PDF para revisión (borrador con marca de agua) o definitivo si ya fue emitido (RFS-01). */
+    /** PDF para revisión (borrador con marca de agua) o definitivo si ya fue emitido (RFS-36). */
     public function pdf(Certificado $certificado)
     {
         return $certificado->toPdf()->stream($certificado->nombreArchivoPdf());
+    }
+
+    /** Solo presidente y secretario pueden abrir el comprobante de pago. */
+    public function comprobante(Certificado $certificado)
+    {
+        abort_unless(
+            $certificado->comprobante_path && Storage::disk('local')->exists($certificado->comprobante_path),
+            404
+        );
+
+        return Storage::disk('local')->response($certificado->comprobante_path);
     }
 
     private function reglasComunes(?string $tipo): array
@@ -150,9 +176,24 @@ class CertificadoAdminController extends Controller
             'rut_solicitante' => ['required', 'string', 'max:12', new RutChileno],
             'direccion' => ['required', 'string', 'max:255'],
             'dirigido_a' => ['required', 'string', 'max:255'],
-            'aporte' => ['nullable', 'integer', 'min:0', 'max:1000000'],
             // RO-02: para residencia se exige ver físicamente carnet y boleta.
             'documentos_verificados' => $tipo === 'residencia' ? ['accepted'] : ['nullable'],
+        ];
+    }
+
+    /** Solo en ventanilla: el pago se registra en el momento y se confirman los 6 meses (RFS-27). */
+    private function reglasPagoVentanilla(?string $tipo): array
+    {
+        if ($tipo !== 'residencia') {
+            return [];
+        }
+
+        return [
+            'residencia_6_meses' => ['accepted'],
+            'pago_verificado' => ['accepted'],
+            'medio_pago' => ['required', Rule::in(array_keys(Ingreso::MEDIOS))],
+            'talonario' => ['required_if:medio_pago,efectivo', 'string', 'max:30'],
+            'numero_transaccion' => ['required_if:medio_pago,transferencia', 'string', 'max:50'],
         ];
     }
 }

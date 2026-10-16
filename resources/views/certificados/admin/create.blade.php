@@ -8,6 +8,7 @@
 
     @php
         $cls = 'mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm';
+        $medios = \App\Models\Ingreso::MEDIOS;
     @endphp
 
     <div class="py-12">
@@ -16,6 +17,7 @@
                 <form method="POST" action="{{ route('admin.certificados.store') }}" class="space-y-6"
                       x-data="{
                           tipo: @js(old('tipo', $socioSel ? 'socio' : 'residencia')),
+                          medio: @js(old('medio_pago', 'efectivo')),
                           nombre: @js(old('nombre_solicitante', $socioSel?->nombre_completo ?? '')),
                           rut: @js(old('rut_solicitante', $socioSel?->rut ?? '')),
                           direccion: @js(old('direccion', $socioSel?->direccion ?? '')),
@@ -31,7 +33,7 @@
                         <x-input-label for="tipo" value="Tipo de certificado" />
                         <select id="tipo" name="tipo" x-model="tipo" class="{{ $cls }}">
                             @foreach (\App\Models\Certificado::TIPOS as $valor => $etiqueta)
-                                <option value="{{ $valor }}">{{ $etiqueta }}</option>
+                                <option value="{{ $valor }}" @selected(old('tipo') === $valor)>{{ $etiqueta }}</option>
                             @endforeach
                         </select>
                         <x-input-error class="mt-2" :messages="$errors->get('tipo')" />
@@ -76,21 +78,60 @@
                         <x-input-error class="mt-2" :messages="$errors->get('dirigido_a')" />
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div>
-                            <x-input-label for="aporte" value="Aporte voluntario recibido (CLP)" />
-                            <input id="aporte" name="aporte" type="number" min="0" step="1" class="{{ $cls }}" value="{{ old('aporte', $aporteSugerido) }}">
-                            <x-input-error class="mt-2" :messages="$errors->get('aporte')" />
-                        </div>
-                    </div>
+                    {{-- Solo residencia: pago y verificaciones --}}
+                    <div x-show="tipo === 'residencia'" class="space-y-6 border-t border-gray-200 dark:border-gray-700 pt-6">
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            El certificado de residencia cuesta $1.000. Registra el pago recibido en este momento.
+                        </p>
 
-                    <div x-show="tipo === 'residencia'">
-                        <label class="inline-flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
-                            <input type="checkbox" name="documentos_verificados" value="1" @checked(old('documentos_verificados'))
-                                   class="mt-0.5 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-indigo-600 shadow-sm focus:ring-indigo-500">
-                            <span>Verifiqué en persona el carnet de identidad y la boleta de luz o agua de la persona.</span>
-                        </label>
-                        <x-input-error class="mt-2" :messages="$errors->get('documentos_verificados')" />
+                        <div>
+                            <x-input-label for="medio_pago" value="Medio de pago" />
+                            <select id="medio_pago" name="medio_pago" x-model="medio" class="{{ $cls }}">
+                                @foreach ($medios as $valor => $etiqueta)
+                                    <option value="{{ $valor }}">{{ $etiqueta }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('medio_pago')" />
+                        </div>
+
+                        <div x-show="medio === 'efectivo'">
+                            <x-input-label for="talonario" value="Número de talonario" />
+                            <input id="talonario" name="talonario" type="text" class="{{ $cls }}" value="{{ old('talonario') }}">
+                            <x-input-error class="mt-2" :messages="$errors->get('talonario')" />
+                        </div>
+
+                        <div x-show="medio === 'transferencia'">
+                            <x-input-label for="numero_transaccion" value="Número de transacción" />
+                            <input id="numero_transaccion" name="numero_transaccion" type="text" class="{{ $cls }}" value="{{ old('numero_transaccion') }}">
+                            <x-input-error class="mt-2" :messages="$errors->get('numero_transaccion')" />
+                        </div>
+
+                        <div>
+                            <label class="inline-flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+                                <input type="checkbox" name="pago_verificado" value="1" @checked(old('pago_verificado'))
+                                       class="mt-0.5 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                <span>Confirmo que recibí el pago de $1.000.</span>
+                            </label>
+                            <x-input-error class="mt-2" :messages="$errors->get('pago_verificado')" />
+                        </div>
+
+                        <div>
+                            <label class="inline-flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+                                <input type="checkbox" name="residencia_6_meses" value="1" @checked(old('residencia_6_meses'))
+                                       class="mt-0.5 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                <span>Confirmo que la persona acredita al menos 6 meses de residencia.</span>
+                            </label>
+                            <x-input-error class="mt-2" :messages="$errors->get('residencia_6_meses')" />
+                        </div>
+
+                        <div>
+                            <label class="inline-flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+                                <input type="checkbox" name="documentos_verificados" value="1" @checked(old('documentos_verificados'))
+                                       class="mt-0.5 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                <span>Verifiqué en persona el carnet de identidad y la boleta de luz o agua de la persona.</span>
+                            </label>
+                            <x-input-error class="mt-2" :messages="$errors->get('documentos_verificados')" />
+                        </div>
                     </div>
 
                     <x-primary-button>Emitir certificado</x-primary-button>

@@ -98,6 +98,10 @@ it('exige verificar carnet y boleta para emitir un certificado de residencia', f
         'rut_solicitante' => '12.345.678-5',
         'direccion' => 'Pasaje 1 #123',
         'dirigido_a' => 'Municipalidad',
+        'medio_pago' => 'efectivo',
+        'talonario' => 'T-1',
+        'pago_verificado' => '1',
+        'residencia_6_meses' => '1',
     ];
 
     $this->actingAs($secretario)

@@ -32,7 +32,7 @@ class Certificado extends Model
     protected $fillable = [
         'tipo', 'user_id', 'socio_id', 'nombre_solicitante', 'rut_solicitante',
         'direccion', 'dirigido_a', 'aporte', 'documentos_verificados', 'observaciones',
-        'numero_transaccion', 'comprobante_path',
+        'numero_transaccion', 'comprobante_path', 'medio_pago', 'talonario',
     ];
 
     protected function casts(): array
@@ -40,6 +40,7 @@ class Certificado extends Model
         return [
             'fecha_emision' => 'date',
             'fecha_vencimiento' => 'date',
+            'fecha_retiro' => 'date',
             'descarga_disponible_hasta' => 'datetime',
             'documentos_verificados' => 'boolean',
         ];
@@ -117,7 +118,8 @@ class Certificado extends Model
             'concepto' => 'certificados',
             'fecha_pago' => now()->toDateString(),
             'monto' => Parametro::entero('certificado_residencia_valor'),
-            'medio_pago' => 'transferencia',
+            'medio_pago' => $this->medio_pago ?? 'transferencia',
+            'talonario' => $this->talonario,
             'numero_transaccion' => $this->numero_transaccion,
             'certificado_id' => $this->id,
             'registrado_por' => $por->id,

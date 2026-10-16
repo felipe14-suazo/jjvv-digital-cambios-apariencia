@@ -32,7 +32,9 @@
             @if (isset($mensajes[session('status')]))
                 <div class="p-4 bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 rounded-lg text-sm">{{ $mensajes[session('status')] }}</div>
             @endif
-
+            
+            @include('socios._cuenta', ['socio' => $socio])
+            
             @if ($errors->has('estado'))
                 <div class="p-4 bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 rounded-lg text-sm">{{ $errors->first('estado') }}</div>
             @endif

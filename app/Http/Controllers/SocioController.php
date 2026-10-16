@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Socio;
+use App\Models\User;
 use App\Rules\RutChileno;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -97,6 +98,38 @@ class SocioController extends Controller
     {
         return view('socios.show', compact('socio'));
     }
+
+    /** Crea la cuenta de un socio registrado en ventanilla (RFU-16, RFS-15). */
+    public function crearCuenta(Request $request, Socio $socio)
+    {
+        abort_unless(
+            $socio->user_id === null && $socio->estado !== 'rechazado',
+            422,
+            'Este socio ya tiene cuenta o no puede tenerla.'
+        );
+
+        $datos = $request->validate([
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:10', 'confirmed'],
+        ]);
+
+        // Una sola creación: la cuenta nace con rol vecino y correo verificado,
+        // porque la identidad se comprobó en persona en ventanilla.
+        $usuario = new User();
+        $usuario->forceFill([
+            'name' => $socio->nombre_completo,
+            'email' => $datos['email'],
+            'password' => $datos['password'],
+            'role' => 'vecino',
+            'email_verified_at' => now(),
+        ])->save();
+
+        $socio->forceFill(['user_id' => $usuario->id])->save();
+
+        return redirect()->route('socios.show', $socio)->with('status', 'cuenta-creada');
+    }
+
+
 
     /** Cambia el estado de la ficha respetando el ciclo de vida (Socio::TRANSICIONES). */
     public function update(Request $request, Socio $socio)
