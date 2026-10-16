@@ -108,10 +108,12 @@
                                                 Disponible hasta {{ $c->descarga_disponible_hasta->format('d-m-Y H:i') }}
                                             </span>
                                         @endif
-                                    @else
+                                    @elseif ($c->tipo === 'residencia' && $c->estado === 'emitido')
                                         <span class="text-xs text-gray-500 dark:text-gray-400">
-                                            Descarga no disponible. Puedes retirarlo en la sede.
+                                            Plazo de descarga vencido. Puedes retirarlo en la sede.
                                         </span>
+                                    @else
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">—</span>
                                     @endif
                                 </td>
                             </tr>

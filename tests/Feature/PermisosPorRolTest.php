@@ -30,7 +30,7 @@ $modulos = [
     'certificados (gestión)' => 'admin.certificados.index',
     'agenda' => 'agenda.index',
     'auditoría' => 'auditoria.index',
-    'finanzas' => 'finanzas.index',
+    'finanzas' => 'ingresos.index',
 ];
 
 it('limita cada rol a sus módulos', function (string $rol, array $permitidos) use ($modulos) {

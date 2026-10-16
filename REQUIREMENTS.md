@@ -1,12 +1,6 @@
 # Requisitos del sistema
 
-## Alcance, perfiles y permisos por rol
-
-El sistema gestiona la inscripción de socios, los certificados, el calendario de la sede, las finanzas, el inventario, las actas y los proyectos de la junta, con cinco roles de usuario. El libro físico sigue siendo el registro oficial de socios y actas.
-
-**Fuera de alcance:** aplicación móvil, procesamiento de pagos (el sistema solo registra los pagos, no los realiza), votación electrónica, noticias y formulario de contacto.
-
-### Perfiles
+## Perfiles
 
 | Perfil | Definición |
 | --- | --- |
@@ -16,7 +10,7 @@ El sistema gestiona la inscripción de socios, los certificados, el calendario d
 | Dirigente | Presidente, secretario o tesorero. |
 | Administrador | Gestiona usuarios y roles. No es dirigente. |
 
-### Permisos por rol
+## Permisos por rol
 
 | Rol | Acceso |
 | --- | --- |
@@ -56,7 +50,7 @@ Los 64 RFU describen qué puede hacer cada actor, agrupados en 11 módulos.
 - **RFU-17** El socio puede solicitar en línea un certificado de residencia, indicando el destinatario y adjuntando el comprobante de transferencia de $1.000.
 - **RFU-18** El socio puede descargar su certificado de residencia desde su perfil durante los 5 días siguientes a su emisión. Vencido el plazo, el enlace desaparece.
 - **RFU-19** El socio que no descargó el certificado dentro del plazo puede retirarlo presencialmente en la sede. Si el sistema registra una descarga, debe pagar de nuevo para obtener otro.
-- **RFU-20** El socio puede descargar su certificado de socio en cualquier momento, sin pago.
+- **RFU-20** [Eliminado]
 - **RFU-21** El vecino no socio puede solicitar el certificado de residencia presencialmente en la sede, acreditando al menos 6 meses de residencia y pagando $1.000 en efectivo o por transferencia.
 - **RFU-22** El presidente o el secretario puede revisar el carnet, la boleta de servicio básico y los 6 meses de residencia del vecino no socio, y dejar constancia de la verificación.
 - **RFU-23** El presidente o el secretario puede comprobar el pago y emitir el certificado de residencia.
@@ -170,8 +164,8 @@ Los 89 RFS traducen los RFU en comportamiento verificable del sistema y fijan la
 - **RFS-30** El sistema deberá guardar en cada certificado los datos del solicitante, las fechas de emisión y caducidad, el folio, el código de verificación, el nombre de quien lo otorga y el destinatario.
 - **RFS-31** El sistema deberá fijar las fechas de emisión y de caducidad al emitirse el certificado, con una vigencia de 90 días configurable. La descarga o el retiro no modifican la vigencia.
 - **RFS-32** El sistema deberá permitir registrar la fecha de retiro del certificado.
-- **RFS-33** El sistema deberá generar el certificado de socio, sin costo, para socios activos y permitir su descarga en todo momento.
-- **RFS-34** El sistema no deberá permitir descargar el certificado de socio si el socio está inactivo.
+- **RFS-33** [Eliminado]
+- **RFS-34** [Eliminado]
 - **RFS-35** El sistema deberá ofrecer una página pública de validación donde, con el código de verificación, cualquiera pueda comprobar la autenticidad y el estado de un certificado (vigente, vencido o anulado), sin iniciar sesión, mostrando solo los datos necesarios con el RUT enmascarado y limitando la cantidad de consultas por minuto.
 - **RFS-36** El sistema deberá generar el certificado en PDF y marcarlo con una marca de agua de borrador mientras no esté emitido.
 - **RFS-37** El sistema deberá registrar automáticamente el pago de $1.000 como ingreso con concepto "certificados" al emitirse el certificado, sin requerir que quien lo emite tenga acceso al módulo de finanzas.
@@ -243,7 +237,7 @@ Los 89 RFS traducen los RFU en comportamiento verificable del sistema y fijan la
 ### 10. Roles, permisos, auditoría, parámetros y cuenta
 
 - **RFS-81** El sistema deberá restringir el acceso a cada módulo según el rol: presidente a todos; secretario a socios, citas, certificados, grupos, calendario, inventario y actas; tesorero a finanzas, actas y reportes financieros.
-- **RFS-82** El sistema deberá autorizar las acciones propias de un socio (certificado de socio, certificado de residencia en línea, actas de asamblea y solicitud de arriendo) según el estado activo de su ficha y no según su rol, de modo que un dirigente con ficha activa también pueda ejecutarlas.
+- **RFS-82** El sistema deberá autorizar las acciones propias de un socio (certificado de residencia en línea, actas de asamblea y solicitud de arriendo) según el estado activo de su ficha y no según su rol, de modo que un dirigente con ficha activa también pueda ejecutarlas.
 - **RFS-83** El sistema deberá permitir al administrador gestionar usuarios y roles y ver el nombre, correo y rol de cada usuario, sin acceso a fichas de socios, finanzas ni actas de directiva.
 - **RFS-84** El sistema no deberá permitir que un administrador cambie su propio rol.
 - **RFS-85** El sistema deberá registrar fecha, autor, cambios y dirección IP en socios, certificados (incluidas las descargas), usuarios, finanzas y cuotas devueltas.

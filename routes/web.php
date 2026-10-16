@@ -35,9 +35,6 @@ Route::middleware('auth')->group(function () {
 
 // ---------- Vecino ----------
 Route::middleware(['auth', 'role:vecino'])->group(function () {
-    Route::get('/mi-panel', function () {
-        return 'Acceso permitido: panel del vecino';
-    })->name('vecino.panel');
 
     // Solicitud de inscripción como socio
     Route::get('/socios/solicitud', [SocioController::class, 'create'])->name('socios.create');
@@ -61,10 +58,6 @@ Route::middleware(['auth', 'role:vecino'])->group(function () {
 
 // ---------- Finanzas: presidente y tesorero ----------
 Route::middleware(['auth', 'role:presidente,tesorero'])->group(function () {
-    Route::get('/finanzas', function () {
-        return 'Acceso permitido: módulo financiero (Presidente o Tesorero)';
-    })->name('finanzas.index');
-
     Route::get('/ingresos', [IngresoController::class, 'index'])->name('ingresos.index');
     Route::get('/ingresos/crear', [IngresoController::class, 'create'])->name('ingresos.create');
     Route::post('/ingresos', [IngresoController::class, 'store'])->name('ingresos.store');

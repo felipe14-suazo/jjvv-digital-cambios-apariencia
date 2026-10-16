@@ -2,15 +2,6 @@
 
 Sistema web para la digitalización y centralización de la gestión administrativa de una Junta de Vecinos.
 
-## Descripción del proyecto
-
-JJVV Digital es una aplicación web orientada a modernizar los procesos administrativos y mejorar el acceso a la información de una Junta de Vecinos.
-
-El proyecto busca centralizar la información de los socios, facilitar la gestión de solicitudes de inscripción y organizar las reservas de atención presencial. Contempla incorporar herramientas para administrar certificados, movimientos financieros, actas, proyectos, agrupaciones, inventario y reportes.
-
-La plataforma pretende reducir la dependencia de documentos físicos, planillas de Excel, archivos Word y canales informales de comunicación, manteniendo los procedimientos presenciales que sean necesarios para cumplir con los requisitos legales y organizacionales.
-
-
 ## Objetivos
 
 - Centralizar la información administrativa de la organización.
@@ -95,21 +86,6 @@ jjvv-digital/
 
 Esta estructura resume los directorios principales de Laravel; el contenido concreto de cada carpeta puede evolucionar durante el desarrollo.
 
-
-## Consideraciones organizacionales
-
-- La inscripción definitiva de un socio requiere la firma presencial del libro de registro.
-- Las actas de directiva deben contar con acceso restringido a los miembros autorizados.
-- Los datos personales y documentos de los vecinos deben estar protegidos mediante controles de acceso adecuados.
-
-## Estado del proyecto
-
-JJVV Digital se encuentra en desarrollo.
-
-La base tecnológica está configurada sobre Laravel, con autenticación, administración de usuarios, roles y funcionalidades iniciales para solicitudes de inscripción de socios, reservas de atención presencial y emisión y validación de certificados.
-
-Los módulos adicionales deben incorporarse progresivamente de acuerdo con la planificación de los sprints y verificarse antes de considerarlos terminados.
-
 ## Plan de sprints
 
 ### Sprint 1: MUST HAVE
@@ -124,7 +100,7 @@ Objetivo: Lo indispensable para que el sistema exista y resuelva el trámite cen
 - Registro de vecinos y solicitud de inscripción, con rechazo con motivo y reapertura para corregirla.
 - Agenda de citas de firma del libro de socios.
 - Mantenedor de socios: registro en ventanilla, búsqueda, edición, baja y reactivación, y creación de cuenta para socios registrados en ventanilla.
-- Certificados de residencia y de socio: solicitud en línea, emisión con folio y PDF, descarga con plazo, retiro presencial, rechazo, anulación, certificado para no socios en ventanilla y validación pública.
+- Certificados de residencia: solicitud en línea, emisión con folio y PDF, descarga con plazo, retiro presencial, rechazo, anulación, certificado para no socios en ventanilla y validación pública.
 - Registro base de ingresos, para guardar el pago del certificado.
 - Auditoría de socios, certificados y usuarios.
 - Gestión de usuarios y roles por el administrador, y eliminación de la propia cuenta.

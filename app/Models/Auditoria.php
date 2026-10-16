@@ -13,6 +13,15 @@ class Auditoria extends Model
 
     protected $guarded = [];
 
+
+        protected static function booted(): void
+    {
+        // Trazabilidad: no se edita ni se elimina (RFS-86).
+        static::updating(fn () => throw new \LogicException('La auditoría no se puede modificar.'));
+        static::deleting(fn () => throw new \LogicException('La auditoría no se puede eliminar.'));
+    }
+
+
     /** Filtros disponibles en la pantalla de auditoría (RFS-87). */
     public const MODELOS = [
         'socio' => Socio::class,

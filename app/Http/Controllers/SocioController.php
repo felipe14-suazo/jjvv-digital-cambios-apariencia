@@ -291,6 +291,9 @@ class SocioController extends Controller
 
     private function mensajes(): array
     {
-        return ['residente_desde.before_or_equal' => 'Debe residir en el sector hace al menos 6 meses.'];
+        return [
+            'residente_desde.before_or_equal' => 'Debe residir en el sector hace al menos 6 meses.',
+            'rut.unique' => 'Este RUT ya figura como socio de la junta. Acércate a la sede para regularizar tu situación.',
+        ];
     }
 }

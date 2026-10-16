@@ -27,6 +27,12 @@ class Ingreso extends Model
         'certificado_id', 'registrado_por',
     ];
 
+    protected static function booted(): void
+    {
+        // Los movimientos no se borran; se anulan con motivo (RFS-67).
+        static::deleting(fn () => throw new \LogicException('Los ingresos no se pueden eliminar.'));
+    }
+
     protected function casts(): array
     {
         return ['fecha_pago' => 'date'];
