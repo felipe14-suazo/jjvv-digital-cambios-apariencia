@@ -27,7 +27,7 @@ class Auditoria extends Model
         'socio' => Socio::class,
         'certificado' => Certificado::class,
         'usuario' => User::class,
-        'finanzas' => Ingreso::class,
+        'finanzas' => [Ingreso::class, Egreso::class, Devolucion::class],
     ];
 
     protected function casts(): array

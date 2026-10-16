@@ -55,6 +55,9 @@
                         <x-nav-link :href="route('ingresos.index')" :active="request()->routeIs('ingresos.*')">
                             Ingresos
                         </x-nav-link>
+                        <x-nav-link :href="route('egresos.index')" :active="request()->routeIs('egresos.*')">
+                            Egresos
+                        </x-nav-link>
                     @endif
 
                     @if (Auth::user()->hasRole('presidente'))
@@ -150,6 +153,9 @@
             @if (Auth::user()->hasRole('presidente', 'tesorero'))
                 <x-responsive-nav-link :href="route('ingresos.index')" :active="request()->routeIs('ingresos.*')">
                     Ingresos
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('egresos.index')" :active="request()->routeIs('egresos.*')">
+                    Egresos
                 </x-responsive-nav-link>
             @endif
 

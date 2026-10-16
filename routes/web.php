@@ -11,7 +11,9 @@ use App\Http\Controllers\VerificacionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ParametroController;
 use App\Http\Controllers\IngresoController;
+use App\Http\Controllers\EgresoController;
 use App\Http\Controllers\GrupoController;
+use App\Http\Controllers\DevolucionController;
 
 // ---------- Público ----------
 Route::get('/', function () {
@@ -64,6 +66,15 @@ Route::middleware(['auth', 'role:presidente,tesorero'])->group(function () {
     Route::post('/ingresos', [IngresoController::class, 'store'])->name('ingresos.store');
     Route::post('/ingresos/{ingreso}/anular', [IngresoController::class, 'anular'])
         ->whereNumber('ingreso')->name('ingresos.anular');
+    Route::get('/egresos', [EgresoController::class, 'index'])->name('egresos.index');
+    Route::get('/egresos/crear', [EgresoController::class, 'create'])->name('egresos.create');
+    Route::post('/egresos', [EgresoController::class, 'store'])->name('egresos.store');
+    Route::post('/egresos/{egreso}/anular', [EgresoController::class, 'anular'])
+        ->whereNumber('egreso')->name('egresos.anular');
+    Route::get('/egresos/{egreso}/comprobante', [EgresoController::class, 'comprobante'])
+        ->whereNumber('egreso')->name('egresos.comprobante');
+    Route::post('/ingresos/{ingreso}/devolver', [DevolucionController::class, 'store'])
+        ->whereNumber('ingreso')->name('ingresos.devolver');
 });
 
 // ---------- Presidente y secretario ----------

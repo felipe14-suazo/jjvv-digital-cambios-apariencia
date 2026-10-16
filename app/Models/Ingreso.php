@@ -6,6 +6,7 @@ use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Ingreso extends Model
 {
@@ -54,10 +55,12 @@ class Ingreso extends Model
         return $query->whereNull('anulado_en');
     }
 
-    /** Saldo de caja (RFS-68). En el bloque 2b se le restarán egresos y devoluciones. */
+    /** Saldo de caja (RFS-68): ingresos menos egresos menos devoluciones, sin contar lo anulado. */
     public static function saldoCaja(): int
     {
-        return (int) static::vigentes()->sum('monto');
+        return (int) static::vigentes()->sum('monto')
+            - (int) Egreso::vigentes()->sum('monto')
+            - (int) Devolucion::sum('monto');
     }
 
     public function estaAnulado(): bool
@@ -73,6 +76,19 @@ class Ingreso extends Model
             'motivo_anulacion' => $motivo,
             'anulado_por' => $por->id,
         ])->save();
+    }
+
+    public function devolucion(): HasOne
+    {
+        return $this->hasOne(Devolucion::class);
+    }
+
+    /** Solo cuotas de socios y aportes de grupos, vigentes y sin devolución previa (RFS-66). */
+    public function puedeDevolverse(): bool
+    {
+        return in_array($this->concepto, ['cuota_socios', 'aporte_grupos'], true)
+            && ! $this->estaAnulado()
+            && ! $this->devolucion()->exists();
     }
 
     public function registrador(): BelongsTo

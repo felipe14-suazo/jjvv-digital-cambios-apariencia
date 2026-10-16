@@ -12,7 +12,7 @@ class IngresoController extends Controller
     public function index()
     {
         return view('finanzas.ingresos.index', [
-            'ingresos' => Ingreso::with('registrador')->latest('fecha_pago')->latest('id')->paginate(20),
+            'ingresos' => Ingreso::with(['registrador', 'devolucion'])->latest('fecha_pago')->latest('id')->paginate(20),
             'saldo' => Ingreso::saldoCaja(),
         ]);
     }
@@ -59,6 +59,11 @@ class IngresoController extends Controller
 
         if ($ingreso->estaAnulado()) {
             return back()->withErrors(['ingreso' => 'Este ingreso ya está anulado.']);
+        }
+        
+        // Si ya tiene devolución, anularlo descontaría el dinero dos veces del saldo.
+        if ($ingreso->devolucion()->exists()) {
+            return back()->withErrors(['ingreso' => 'Este ingreso ya fue devuelto y no se puede anular.']);
         }
 
         $ingreso->anular($datos['motivo_anulacion'], $request->user());

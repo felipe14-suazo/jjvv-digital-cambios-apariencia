@@ -20,7 +20,7 @@ class AuditoriaController extends Controller
         ]);
 
         $auditorias = Auditoria::with('usuario')
-            ->when($request->modelo, fn ($q, $m) => $q->where('auditable_type', Auditoria::MODELOS[$m]))
+            ->when($request->modelo, fn ($q, $m) => $q->whereIn('auditable_type', (array) Auditoria::MODELOS[$m]))
             ->when($request->desde, fn ($q, $f) => $q->whereDate('created_at', '>=', $f))
             ->when($request->hasta, fn ($q, $f) => $q->whereDate('created_at', '<=', $f))
             ->when($request->autor, fn ($q, $a) => $q->where('user_id', $a))

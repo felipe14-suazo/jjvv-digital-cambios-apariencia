@@ -13,6 +13,13 @@
                 <p class="text-red-600">{{ $message }}</p>
             @enderror
 
+            @if (session('status') === 'devolucion-registrada')
+                <p class="text-green-700">Devolución registrada.</p>
+            @endif
+            @error('devolucion')
+                <p class="text-red-600">{{ $message }}</p>
+            @enderror
+
             <div class="flex justify-between items-center">
                 <p class="text-gray-700">Saldo de caja: <strong>${{ number_format($saldo, 0, ',', '.') }}</strong></p>
                 <a href="{{ route('ingresos.create') }}" class="underline">Registrar ingreso</a>
@@ -45,13 +52,18 @@
                                             Anulado el {{ $ingreso->anulado_en->format('d-m-Y') }}: {{ $ingreso->motivo_anulacion }}
                                         </div>
                                     @endif
+                                    @if ($ingreso->devolucion)
+                                        <div class="text-xs text-amber-700">
+                                            Devuelto el {{ $ingreso->devolucion->fecha_devolucion->format('d-m-Y') }}: {{ $ingreso->devolucion->motivo }}
+                                        </div>
+                                    @endif
                                 </td>
                                 <td>${{ number_format($ingreso->monto, 0, ',', '.') }}</td>
                                 <td>{{ Ingreso::MEDIOS[$ingreso->medio_pago] }}</td>
                                 <td>{{ $ingreso->talonario ?? $ingreso->numero_transaccion }}</td>
                                 <td>{{ $ingreso->registrador?->name ?? '—' }}</td>
                                 <td>
-                                    @unless ($ingreso->estaAnulado())
+                                    @unless ($ingreso->estaAnulado() || $ingreso->devolucion)
                                         <details>
                                             <summary class="cursor-pointer underline text-red-600">Anular</summary>
                                             <form method="POST" action="{{ route('ingresos.anular', $ingreso) }}" class="mt-2 space-y-2">
@@ -64,6 +76,20 @@
                                             </form>
                                         </details>
                                     @endunless
+
+                                    @if ($ingreso->puedeDevolverse())
+                                        <details class="mt-1">
+                                            <summary class="cursor-pointer underline text-amber-700">Devolver</summary>
+                                            <form method="POST" action="{{ route('ingresos.devolver', $ingreso) }}" class="mt-2 space-y-2">
+                                                @csrf
+                                                <textarea name="motivo" rows="2" required placeholder="Motivo obligatorio"
+                                                          class="block w-full rounded-md border-gray-300 text-sm"></textarea>
+                                                <button type="submit" class="px-3 py-1 rounded-md bg-amber-600 text-white text-xs">
+                                                    Confirmar devolución
+                                                </button>
+                                            </form>
+                                        </details>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
