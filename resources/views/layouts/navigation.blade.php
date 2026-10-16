@@ -45,6 +45,12 @@
                         </x-nav-link>
                     @endif
 
+                    @if (Auth::user()->hasRole('presidente', 'secretario') || Auth::user()->esSocioActivo())
+                        <x-nav-link :href="route('calendario.index')" :active="request()->routeIs('calendario.*')">
+                            Calendario
+                        </x-nav-link>
+                    @endif
+
                     @if (Auth::user()->hasRole('presidente', 'secretario'))
                         <x-nav-link :href="route('parametros.index')" :active="request()->routeIs('parametros.*')">
                             Parámetros
@@ -142,6 +148,12 @@
                 <x-responsive-nav-link :href="route('grupos.index')" :active="request()->routeIs('grupos.*')">
                     Grupos
                 </x-responsive-nav-link>
+            @endif
+
+            @if (Auth::user()->hasRole('presidente', 'secretario') || Auth::user()->esSocioActivo())
+                <x-nav-link :href="route('calendario.index')" :active="request()->routeIs('calendario.*')">
+                    Calendario
+                </x-nav-link>
             @endif
 
             @if (Auth::user()->hasRole('presidente', 'secretario'))

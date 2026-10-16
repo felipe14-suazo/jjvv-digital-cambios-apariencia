@@ -86,6 +86,123 @@
                 </form>
             </div>
 
+            {{-- Horarios fijos (RFU-34, RFS-47, RFS-49) --}}
+            @php
+                $claseSelect = 'border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm';
+            @endphp
+            <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6 space-y-6">
+                <div>
+                    <h3 class="font-medium text-gray-900 dark:text-gray-100">Horarios fijos</h3>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                        Reservas que se repiten cada semana. Las reservas de cada mes se generan con el botón de más abajo.
+                        Editar o eliminar un horario no cambia las reservas ya generadas.
+                    </p>
+                </div>
+
+                @error('horario')
+                    <div class="p-4 bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 rounded-lg text-sm">
+                        {{ $message }}
+                    </div>
+                @enderror
+
+                @if (session('mensaje'))
+                    <div class="p-4 bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 rounded-lg text-sm">
+                        {{ session('mensaje') }}
+                    </div>
+                @endif
+
+                @if (session('omitidas'))
+                    <div class="p-4 bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-100 rounded-lg text-sm">
+                        <p class="font-medium">No se generaron estos días:</p>
+                        <ul class="mt-1 list-disc ps-5">
+                            @foreach (session('omitidas') as $omitida)
+                                <li>{{ $omitida }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                {{-- Horarios existentes --}}
+                @forelse ($grupo->horariosFijos as $horario)
+                    <div class="flex flex-wrap items-end gap-3">
+                        <form method="POST" action="{{ route('grupos.horarios.update', $horario) }}" class="flex flex-wrap items-end gap-3">
+                            @csrf
+                            @method('PUT')
+                            <select name="dia_semana" class="{{ $claseSelect }}">
+                                @foreach (\App\Models\HorarioFijo::DIAS as $numero => $nombre)
+                                    <option value="{{ $numero }}" @selected((int) $horario->dia_semana === $numero)>{{ $nombre }}</option>
+                                @endforeach
+                            </select>
+                            <select name="hora_inicio" class="{{ $claseSelect }}">
+                                @foreach ($horas as $hora)
+                                    <option value="{{ $hora }}" @selected(substr($horario->hora_inicio, 0, 5) === $hora)>{{ $hora }}</option>
+                                @endforeach
+                            </select>
+                            <span class="pb-2 text-gray-500 dark:text-gray-400">a</span>
+                            <select name="hora_fin" class="{{ $claseSelect }}">
+                                @foreach ($horasFin as $hora)
+                                    <option value="{{ $hora }}" @selected(substr($horario->hora_fin, 0, 5) === $hora)>{{ $hora }}</option>
+                                @endforeach
+                            </select>
+                            <x-secondary-button type="submit">Guardar</x-secondary-button>
+                        </form>
+
+                        <form method="POST" action="{{ route('grupos.horarios.destroy', $horario) }}"
+                              onsubmit="return confirm('¿Eliminar este horario fijo? Las reservas ya generadas se mantienen.')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="pb-2 underline text-sm text-red-600 dark:text-red-400">Eliminar</button>
+                        </form>
+                    </div>
+                @empty
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Este grupo aún no tiene horarios fijos.</p>
+                @endforelse
+
+                {{-- Agregar horario --}}
+                <form method="POST" action="{{ route('grupos.horarios.store', $grupo) }}"
+                      class="flex flex-wrap items-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    @csrf
+                    <div>
+                        <x-input-label for="nuevo_dia" value="Día" />
+                        <select id="nuevo_dia" name="dia_semana" class="mt-1 block {{ $claseSelect }}" required>
+                            @foreach (\App\Models\HorarioFijo::DIAS as $numero => $nombre)
+                                <option value="{{ $numero }}">{{ $nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <x-input-label for="nuevo_desde" value="Desde" />
+                        <select id="nuevo_desde" name="hora_inicio" class="mt-1 block {{ $claseSelect }}" required>
+                            @foreach ($horas as $hora)
+                                <option value="{{ $hora }}">{{ $hora }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <x-input-label for="nuevo_hasta" value="Hasta" />
+                        <select id="nuevo_hasta" name="hora_fin" class="mt-1 block {{ $claseSelect }}" required>
+                            @foreach ($horasFin as $hora)
+                                <option value="{{ $hora }}">{{ $hora }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <x-primary-button>Agregar horario</x-primary-button>
+                </form>
+
+                {{-- Generar reservas del mes --}}
+                <form method="POST" action="{{ route('grupos.horarios.generar', $grupo) }}"
+                      class="flex flex-wrap items-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    @csrf
+                    <div>
+                        <x-input-label for="mes" value="Generar reservas del mes" />
+                        <x-text-input id="mes" name="mes" type="month" class="mt-1 block"
+                            :value="now()->addMonth()->format('Y-m')"
+                            min="{{ now()->format('Y-m') }}" max="{{ now()->addMonths(6)->format('Y-m') }}" required />
+                    </div>
+                    <x-primary-button>Generar reservas</x-primary-button>
+                </form>
+            </div>
+
             <a href="{{ route('grupos.index') }}" class="underline text-sm text-gray-600 dark:text-gray-400">Volver al listado</a>
         </div>
     </div>

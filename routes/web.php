@@ -14,6 +14,8 @@ use App\Http\Controllers\IngresoController;
 use App\Http\Controllers\EgresoController;
 use App\Http\Controllers\GrupoController;
 use App\Http\Controllers\DevolucionController;
+use App\Http\Controllers\ReservaController;
+use App\Http\Controllers\HorarioFijoController;
 
 // ---------- Público ----------
 Route::get('/', function () {
@@ -77,6 +79,9 @@ Route::middleware(['auth', 'role:presidente,tesorero'])->group(function () {
         ->whereNumber('ingreso')->name('ingresos.devolver');
 });
 
+// ---------- Calendario: dirigentes y socios activos (el controlador decide qué ve cada uno) ----------
+Route::middleware('auth')->get('/calendario', [ReservaController::class, 'index'])->name('calendario.index');
+
 // ---------- Presidente y secretario ----------
 Route::middleware(['auth', 'role:presidente,secretario'])->group(function () {
 
@@ -112,6 +117,14 @@ Route::middleware(['auth', 'role:presidente,secretario'])->group(function () {
             ->whereNumber('grupo')->name('representante');
         Route::put('/{grupo}/contacto', [GrupoController::class, 'actualizarContacto'])
             ->whereNumber('grupo')->name('contacto');
+        Route::post('/{grupo}/horarios', [HorarioFijoController::class, 'store'])
+            ->whereNumber('grupo')->name('horarios.store');
+        Route::post('/{grupo}/horarios/generar', [HorarioFijoController::class, 'generar'])
+            ->whereNumber('grupo')->name('horarios.generar');
+        Route::put('/horarios/{horario}', [HorarioFijoController::class, 'update'])
+            ->whereNumber('horario')->name('horarios.update');
+        Route::delete('/horarios/{horario}', [HorarioFijoController::class, 'destroy'])
+            ->whereNumber('horario')->name('horarios.destroy');
     });
 
     // Certificados
@@ -133,6 +146,9 @@ Route::middleware(['auth', 'role:presidente,secretario'])->group(function () {
     // Parámetros del sistema
     Route::get('/parametros', [ParametroController::class, 'index'])->name('parametros.index');
     Route::put('/parametros', [ParametroController::class, 'update'])->name('parametros.update');
+
+    // Calendario: ingreso de reservas
+    Route::post('/calendario/reservas', [ReservaController::class, 'store'])->name('reservas.store');
 });
 
 // ---------- Auditoría: solo presidente ----------

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Grupo;
 use App\Models\Socio;
+use App\Models\Reserva;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -31,12 +32,19 @@ class GrupoController extends Controller
 
     public function show(Grupo $grupo)
     {
+        $bloques = Reserva::bloquesDeLaSede();
+
         return view('grupos.show', [
-            'grupo' => $grupo->load('representante'),
+            'grupo' => $grupo->load([
+                'representante',
+                'horariosFijos' => fn ($q) => $q->orderBy('dia_semana')->orderBy('hora_inicio'),
+            ]),
             'socios' => Socio::where('estado', 'activo')
                 ->whereNotNull('user_id')
                 ->orderBy('nombre_completo')
                 ->get(),
+            'horas' => $bloques['inicios'],
+            'horasFin' => $bloques['fines'],
         ]);
     }
 

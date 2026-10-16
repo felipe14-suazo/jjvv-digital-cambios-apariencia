@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Grupo extends Model
 {
@@ -18,6 +19,11 @@ class Grupo extends Model
     public function representante(): BelongsTo
     {
         return $this->belongsTo(Socio::class, 'representante_id');
+    }
+
+    public function horariosFijos(): HasMany
+    {
+        return $this->hasMany(HorarioFijo::class);
     }
 
     /** Representante vigente: socio activo con cuenta de usuario (RFS-39). */
