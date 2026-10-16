@@ -4,6 +4,12 @@ Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-s
 
 **Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
+## First Rules
+- Do not install anything that is not necessary for the task.
+- Generate only plain text for coding. Do not generate code files unless the user confirms it.
+- Present a plan first, followed by a step-by-step guide with code.
+- Treat REQUIREMENTS.md as the source of truth for RFU, RFS, and permissions.
+
 ## 1. Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
