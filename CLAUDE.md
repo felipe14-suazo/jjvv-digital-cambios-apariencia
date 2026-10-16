@@ -1,8 +1,6 @@
 # CLAUDE.md
 
-Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
-
-**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+This a Software engineering student's project. It won't be a complete product, only an MVP. Read SPRINTS.md to see the current state.
 
 ## First Rules
 - Do not install anything that is not necessary for the task.
@@ -54,9 +52,9 @@ The test: Every changed line should trace directly to the user's request.
 **Define success criteria. Loop until verified.**
 
 Transform tasks into verifiable goals:
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
+- "Add validation" → "Define expected invalid inputs and ensure they are properly handled"
+- "Fix the bug" → "Identify the failing case, apply the fix, and confirm it works"
+- "Refactor X" → "Ensure functionality remains intact before and after changes"
 
 For multi-step tasks, state a brief plan:
 ```

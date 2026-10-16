@@ -1,4 +1,4 @@
-# JJVV Digital
+# Proyecto de título: JJVV Digital
 
 Sistema web para la digitalización y centralización de la gestión administrativa de una Junta de Vecinos.
 
@@ -85,51 +85,3 @@ jjvv-digital/
 ```
 
 Esta estructura resume los directorios principales de Laravel; el contenido concreto de cada carpeta puede evolucionar durante el desarrollo.
-
-## Plan de sprints
-
-### Sprint 1: MUST HAVE
-
-Objetivo: Lo indispensable para que el sistema exista y resuelva el trámite central: cuentas, roles, socios y certificados.
-
-#### Entregables:
-
-- Configuración del entorno web y base de datos central.
-- Roles y permisos (Administrador, Presidente, Secretario, Tesorero, Vecino). “Socio” se deduce de la ficha activa.
-- Parámetros configurables del sistema (horario de la sede, vigencia del certificado, plazos y valores).
-- Registro de vecinos y solicitud de inscripción, con rechazo con motivo y reapertura para corregirla.
-- Agenda de citas de firma del libro de socios.
-- Mantenedor de socios: registro en ventanilla, búsqueda, edición, baja y reactivación, y creación de cuenta para socios registrados en ventanilla.
-- Certificados de residencia: solicitud en línea, emisión con folio y PDF, descarga con plazo, retiro presencial, rechazo, anulación, certificado para no socios en ventanilla y validación pública.
-- Registro base de ingresos, para guardar el pago del certificado.
-- Auditoría de socios, certificados y usuarios.
-- Gestión de usuarios y roles por el administrador, y eliminación de la propia cuenta.
-
-### Sprint 2: SHOULD HAVE
-
-Objetivo: Funcionalidades de alto valor para la gestión diaria de la sede: quién la usa, cuándo y cuánto se paga.
-
-#### Entregables:
-
-- Grupos y organizaciones, con su representante vigente.
-- Calendario de espacios: reservas, horarios fijos de grupos, arriendos con confirmación de pago y garantía, y horario imprimible.
-- Módulo financiero completo: ingresos (con cuotas ordinarias y extraordinarias), garantías de arriendo, egresos, devoluciones, anulaciones y saldo de caja.
-- Auditoría de finanzas y consulta de auditoría con filtros por fecha, autor y tipo de registro.
-
-### Sprint 3: COULD HAVE
-
-Objetivo: Módulos complementarios de transparencia y generación de salidas.
-
-#### Entregables:
-
-- Actas de asamblea y de directiva, con acceso según rol.
-- Proyectos postulados y adjudicados, visibles para todo usuario con sesión iniciada.
-- Inventario y préstamos de insumos.
-- Reportes: financieros y listado de socios en Excel y PDF.
-
-#### Sprint 4: TESTING & BUFFER
-
-Objetivo: Pruebas, corrección de errores (bugs) y empaquetado para la entrega final. 
-
-
-
