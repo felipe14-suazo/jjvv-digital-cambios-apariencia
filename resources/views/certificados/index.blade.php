@@ -5,7 +5,6 @@
 
     @php
         $cls = 'mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm';
-        $esSocioActivo = $socio && $socio->estado === 'activo';
     @endphp
 
     <div class="py-12">
@@ -24,24 +23,14 @@
                     El aporte voluntario es de ${{ number_format(\App\Models\Parametro::entero('certificado_residencia_valor'), 0, ',', '.') }}.
                 </p>
 
-                <form method="POST" action="{{ route('certificados.store') }}" enctype="multipart/form-data" class="mt-6 space-y-6"
-                      x-data="{ tipo: @js(old('tipo', 'residencia')) }">
+                <form method="POST" action="{{ route('certificados.store') }}" enctype="multipart/form-data" class="mt-6 space-y-6">
                     @csrf
+                    <input type="hidden" name="tipo" value="residencia">
 
-                    <div>
-                        <x-input-label for="tipo" value="Tipo de certificado" />
-                        <select id="tipo" name="tipo" x-model="tipo" class="{{ $cls }}">
-                            <option value="residencia">Certificado de residencia</option>
-                            <option value="socio" @disabled(! $esSocioActivo)>Certificado de socio{{ $esSocioActivo ? '' : ' (solo socios activos)' }}</option>
-                        </select>
-                        <x-input-error class="mt-2" :messages="$errors->get('tipo')" />
-                    </div>
-
-                    <div x-show="tipo === 'residencia'" class="space-y-6">
+                    <div class="space-y-6">
                         <div>
                             <x-input-label for="nombre_solicitante" value="Nombre completo" />
                             <input id="nombre_solicitante" name="nombre_solicitante" type="text" class="{{ $cls }}"
-                                   x-bind:disabled="tipo !== 'residencia'"
                                    value="{{ old('nombre_solicitante', $socio?->nombre_completo ?? auth()->user()->name) }}">
                             <x-input-error class="mt-2" :messages="$errors->get('nombre_solicitante')" />
                         </div>
@@ -49,21 +38,17 @@
                             <div>
                                 <x-input-label for="rut_solicitante" value="RUT" />
                                 <input id="rut_solicitante" name="rut_solicitante" type="text" class="{{ $cls }}" placeholder="12345678-5"
-                                       x-bind:disabled="tipo !== 'residencia'" value="{{ old('rut_solicitante', $socio?->rut) }}">
+                                       value="{{ old('rut_solicitante', $socio?->rut) }}">
                                 <x-input-error class="mt-2" :messages="$errors->get('rut_solicitante')" />
                             </div>
                             <div>
                                 <x-input-label for="direccion" value="Dirección" />
                                 <input id="direccion" name="direccion" type="text" class="{{ $cls }}"
-                                       x-bind:disabled="tipo !== 'residencia'" value="{{ old('direccion', $socio?->direccion) }}">
+                                       value="{{ old('direccion', $socio?->direccion) }}">
                                 <x-input-error class="mt-2" :messages="$errors->get('direccion')" />
                             </div>
                         </div>
                     </div>
-
-                    <p x-show="tipo === 'socio'" class="text-sm text-gray-600 dark:text-gray-400">
-                        Se usarán los datos de tu ficha de socio ({{ $socio?->nombre_completo }}).
-                    </p>
 
                     <div>
                         <x-input-label for="dirigido_a" value="¿Dónde o ante quién lo presentarás?" />
