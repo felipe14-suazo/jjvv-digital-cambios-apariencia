@@ -16,67 +16,115 @@
                 </div>
             @endif
 
+            @php
+                // Une bloques consecutivos iguales de un mismo día en una sola celda (rowspan).
+                $filas = [];     // [fecha][hora de inicio] => cantidad de bloques
+                $cubiertas = []; // [fecha][hora] => true si la celda de arriba ya la cubre
+                foreach ($dias as $dia) {
+                    $f = $dia->toDateString();
+                    $inicio = null;
+                    foreach ($horas as $hora) {
+                        $celda = $celdas[$f][$hora] ?? null;
+                        if ($celda && $inicio && $celda == $celdas[$f][$inicio]) {
+                            $filas[$f][$inicio]++;
+                            $cubiertas[$f][$hora] = true;
+                        } else {
+                            $inicio = $celda ? $hora : null;
+                            if ($celda) {
+                                $filas[$f][$hora] = 1;
+                            }
+                        }
+                    }
+                }
+            @endphp
+
             {{-- Navegación entre semanas --}}
             <div class="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-0">
-                <h3 class="font-medium text-gray-900 dark:text-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
                     Semana del {{ $dias->first()->translatedFormat('j \d\e F') }}
                     al {{ $dias->last()->translatedFormat('j \d\e F \d\e Y') }}
                 </h3>
-                <div class="flex gap-4 text-sm">
+                <div class="inline-flex divide-x divide-gray-300 overflow-hidden rounded-lg text-sm shadow-sm ring-1 ring-gray-300 dark:divide-gray-600 dark:ring-gray-600">
                     <a href="{{ route('calendario.index', ['semana' => $lunes->copy()->subWeek()->toDateString()]) }}"
-                       class="underline text-gray-600 dark:text-gray-400">← Anterior</a>
+                       class="bg-white px-3 py-2 text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">← Anterior</a>
                     <a href="{{ route('calendario.index') }}"
-                       class="underline text-gray-600 dark:text-gray-400">Esta semana</a>
+                       class="bg-white px-3 py-2 text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">Esta semana</a>
                     <a href="{{ route('calendario.index', ['semana' => $lunes->copy()->addWeek()->toDateString()]) }}"
-                       class="underline text-gray-600 dark:text-gray-400">Siguiente →</a>
+                       class="bg-white px-3 py-2 text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">Siguiente →</a>
+                </div>
+            </div>
+
+            {{-- Leyenda --}}
+            <div class="flex flex-wrap items-center gap-x-6 gap-y-2 px-4 text-xs font-medium text-gray-600 dark:text-gray-300 sm:px-0">
+                @if ($esDirigente)
+                    <div class="flex items-center gap-2">
+                        <div class="h-3.5 w-3.5 rounded bg-indigo-600 dark:bg-indigo-500"></div>
+                        <span>Reserva</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="h-3.5 w-3.5 rounded bg-amber-500 dark:bg-amber-600"></div>
+                        <span>Horario fijo (sin generar)</span>
+                    </div>
+                @else
+                    <div class="flex items-center gap-2">
+                        <div class="h-3.5 w-3.5 rounded bg-gray-500 dark:bg-gray-600"></div>
+                        <span>Ocupado</span>
+                    </div>
+                @endif
+                <div class="flex items-center gap-2">
+                    <div class="h-3.5 w-3.5 rounded border border-gray-300 dark:border-gray-600"></div>
+                    <span>Libre</span>
                 </div>
             </div>
 
             {{-- Grilla semanal --}}
-            <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg overflow-x-auto">
-                <table class="min-w-full text-xs border-collapse">
-                    <thead class="bg-gray-50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300">
-                        <tr>
-                            <th class="px-3 py-2 w-16"></th>
-                            @foreach ($dias as $dia)
-                                <th class="px-3 py-2 font-medium text-left {{ $dia->isToday() ? 'text-indigo-600 dark:text-indigo-400' : '' }}">
-                                    {{ ucfirst($dia->translatedFormat('D j')) }}
-                                </th>
-                            @endforeach
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                        @foreach ($horas as $hora)
-                            <tr>
-                                <td class="px-3 py-2 font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ $hora }}</td>
+            <div class="overflow-hidden bg-white shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700 sm:rounded-xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[56rem] table-fixed border-collapse text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800">
+                                <th class="w-20"></th>
                                 @foreach ($dias as $dia)
-                                    @php
-                                        $celda = $celdas[$dia->toDateString()][$hora] ?? null;
-                                        if (! $celda) {
-                                            $clase = 'text-gray-400 dark:text-gray-500';
-                                        } elseif (! $esDirigente) {
-                                            $clase = 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200';
-                                        } elseif ($celda['tipo'] === 'fijo') {
-                                            $clase = 'bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-100';
-                                        } else {
-                                            $clase = 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-900 dark:text-indigo-100';
-                                        }
-                                    @endphp
-                                    <td class="px-2 py-2 border-l border-gray-200 dark:border-gray-700 {{ $clase }}">
-                                        {{ $celda['texto'] ?? 'Libre' }}
-                                    </td>
+                                    <th class="border-l border-gray-200 dark:border-gray-700 px-3 py-3 text-center {{ $dia->isToday() ? 'bg-indigo-50/50 dark:bg-indigo-900/20' : '' }}">
+                                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ $dia->translatedFormat('D') }}</div>
+                                        <div class="mt-1 text-lg font-bold {{ $dia->isToday() ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-900 dark:text-gray-100' }}">{{ $dia->format('j') }}</div>
+                                    </th>
                                 @endforeach
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach ($horas as $hora)
+                                <tr class="border-t border-gray-200 dark:border-gray-700">
+                                    <td class="h-12 pr-4 pt-2 text-right align-top text-xs font-medium text-gray-500 dark:text-gray-400">{{ $hora }}</td>
+                                    @foreach ($dias as $dia)
+                                        @php $f = $dia->toDateString(); @endphp
+                                        @continue(isset($cubiertas[$f][$hora]))
+                                        @php $celda = $celdas[$f][$hora] ?? null; @endphp
+
+                                        @if (! $celda)
+                                            <td class="h-12 border-l border-gray-200 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/40 {{ $dia->isToday() ? 'bg-indigo-50/50 dark:bg-indigo-500/5' : '' }}"></td>
+                                        @else
+                                            @php
+                                                $clase = ! $esDirigente
+                                                    ? 'border-gray-500 bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200'
+                                                    : ($celda['tipo'] === 'fijo'
+                                                        ? 'border-amber-500 bg-amber-50 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100'
+                                                        : 'border-indigo-500 bg-indigo-100 text-indigo-900 dark:bg-indigo-900/50 dark:text-indigo-100');
+                                            @endphp
+                                            <td rowspan="{{ $filas[$f][$hora] }}"
+                                                class="border-l-4 px-3 py-2 align-top text-xs font-semibold shadow-sm transition-all hover:opacity-90 {{ $clase }}">
+                                                {{ $celda['texto'] }}
+                                            </td>
+                                        @endif
+                                    @endforeach
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             @if ($esDirigente)
-                <p class="px-4 sm:px-0 text-xs text-gray-500 dark:text-gray-400">
-                    Azul: reserva. Ámbar: horario fijo de grupo aún sin generar para esa semana.
-                </p>
-
                 {{-- Ingreso de reservas --}}
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg"
                      x-data="{ tipo: '{{ old('tipo', 'grupo') }}' }">
