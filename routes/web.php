@@ -29,7 +29,36 @@ Route::get('/verificar/{codigo}', [VerificacionController::class, 'mostrar'])->m
 
 // ---------- Cualquier usuario autenticado ----------
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    $usuario = auth()->user();
+    $resumen = [];
+
+    if ($usuario->hasRole('presidente', 'secretario')) {
+        $resumen[] = [
+            'etiqueta' => 'Solicitudes de socio pendientes',
+            'valor' => \App\Models\Socio::where('estado', 'pendiente')->count(),
+            'ruta' => route('socios.index'),
+        ];
+        $resumen[] = [
+            'etiqueta' => 'Socios pendientes de firma',
+            'valor' => \App\Models\Socio::where('estado', 'por_firmar')->count(),
+            'ruta' => route('agenda.index'),
+        ];
+        $resumen[] = [
+            'etiqueta' => 'Certificados por revisar',
+            'valor' => \App\Models\Certificado::where('estado', 'solicitado')->count(),
+            'ruta' => route('admin.certificados.index'),
+        ];
+    }
+
+    if ($usuario->hasRole('presidente', 'tesorero')) {
+        $resumen[] = [
+            'etiqueta' => 'Saldo de caja',
+            'valor' => '$'.number_format(\App\Models\Ingreso::saldoCaja(), 0, ',', '.'),
+            'ruta' => route('ingresos.index'),
+        ];
+    }
+
+    return view('dashboard', compact('resumen'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {

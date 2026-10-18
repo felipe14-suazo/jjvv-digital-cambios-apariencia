@@ -1,18 +1,18 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Registrar ingreso</h2>
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Registrar ingreso</h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white p-6 shadow sm:rounded-lg">
+            <div class="bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700 sm:rounded-xl">
                 <form method="POST" action="{{ route('ingresos.store') }}" class="space-y-4"
                       x-data="{ concepto: @js(old('concepto', '')) }">
                     @csrf
 
                     <div>
                         <x-input-label for="concepto" value="Concepto" />
-                        <select id="concepto" name="concepto" x-model="concepto" class="mt-1 block w-full rounded-md border-gray-300">
+                        <select id="concepto" name="concepto" x-model="concepto" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                             <option value="">Seleccionar</option>
                             @foreach ($conceptos as $valor => $etiqueta)
                                 <option value="{{ $valor }}" @selected(old('concepto') === $valor)>{{ $etiqueta }}</option>
@@ -23,7 +23,7 @@
 
                     <div x-show="concepto === 'cuota_socios'" x-cloak>
                         <x-input-label for="tipo_cuota" value="Tipo de cuota" />
-                        <select id="tipo_cuota" name="tipo_cuota" class="mt-1 block w-full rounded-md border-gray-300">
+                        <select id="tipo_cuota" name="tipo_cuota" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                             <option value="">Seleccionar</option>
                             @foreach ($tiposCuota as $valor => $etiqueta)
                                 <option value="{{ $valor }}" @selected(old('tipo_cuota') === $valor)>{{ $etiqueta }}</option>
@@ -46,7 +46,7 @@
 
                     <div>
                         <x-input-label for="medio_pago" value="Medio de pago" />
-                        <select id="medio_pago" name="medio_pago" class="mt-1 block w-full rounded-md border-gray-300">
+                        <select id="medio_pago" name="medio_pago" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
                             @foreach ($medios as $valor => $etiqueta)
                                 <option value="{{ $valor }}" @selected(old('medio_pago') === $valor)>{{ $etiqueta }}</option>
                             @endforeach
@@ -68,7 +68,7 @@
 
                     <div>
                         <x-input-label for="observaciones" value="Observaciones (obligatorias si el concepto es Otros)" />
-                        <textarea id="observaciones" name="observaciones" rows="3" class="mt-1 block w-full rounded-md border-gray-300">{{ old('observaciones') }}</textarea>
+                        <textarea id="observaciones" name="observaciones" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">{{ old('observaciones') }}</textarea>
                         <x-input-error :messages="$errors->get('observaciones')" class="mt-2" />
                     </div>
 
